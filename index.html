@@ -1,0 +1,1044 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Comodín</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#141413">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Comodín">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<style>
+:root{
+  --bg:#f5f4f0; --surface:#ffffff; --surface2:#efede8; --text:#1d1c1a; --muted:#6e6a63; --line:#e2dfd8;
+  --accent:#2f5bd3; --danger:#d23b2e; --warn:#c77a0a; --ok:#1f9d55;
+  --t-clase:#3b82f6; --t-estudio:#7c3aed; --t-actividad:#c026d3; --t-koppi:#ea580c;
+  --t-revision:#64748b; --t-deporte:#16a34a; --t-descanso:#a8a29e; --t-sueno:#4c5a86;
+  --radius:12px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#141413; --surface:#1e1d1b; --surface2:#292825; --text:#ecebe7; --muted:#a09c94; --line:#34322e;
+    --accent:#7aa2ff; --danger:#ff6b5e; --warn:#f0a23b; --ok:#4ccf85;
+    --t-estudio:#a78bfa; --t-actividad:#e879f9; --t-koppi:#fb923c; --t-revision:#94a3b8; --t-deporte:#4ade80; --t-descanso:#78716c; --t-sueno:#8f9dcc;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+.capt{display:flex;flex-wrap:wrap;gap:8px}
+.capt input[type=text]{flex:1 1 100%}
+.capt select{flex:1 1 170px}
+.capt input[type=date],.capt input[type=time]{flex:1 1 120px}
+.capt .btn{flex:0 0 auto}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+body{font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-inline:16px}
+a{color:var(--accent)}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding-top:max(18px, env(safe-area-inset-top));padding-bottom:max(60px, env(safe-area-inset-bottom))}
+body{padding-left:max(16px, env(safe-area-inset-left));padding-right:max(16px, env(safe-area-inset-right))}
+.sync{font-size:12px;padding:2px 9px;border-radius:999px;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.sync::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:6px;vertical-align:1px}
+.sync.ok{color:var(--ok)} .sync.warn{color:var(--warn)} .sync.err{color:var(--danger)}
+#login{position:fixed;inset:0;z-index:50;background:var(--bg);display:grid;place-items:center;padding:24px 16px}
+.login-card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+.login-card h2{margin:0 0 4px;font-size:22px}
+.login-card input{width:100%;padding:10px 12px}
+.login-err{color:var(--danger);min-height:1.2em}
+.linkbtn{border:0;background:none;color:var(--muted);text-decoration:underline;cursor:pointer;margin-top:12px;padding:0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:max(16px, env(safe-area-inset-bottom));z-index:40;background:var(--text);color:var(--bg);
+  padding:10px 14px;border-radius:12px;display:flex;gap:12px;align-items:center;box-shadow:0 6px 24px rgba(0,0,0,.25);max-width:calc(100% - 32px)}
+.toast button{border:0;border-radius:8px;padding:5px 10px;background:var(--bg);color:var(--text);cursor:pointer;font-weight:600}
+
+/* Header */
+header{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand h1{font-size:20px;margin:0;letter-spacing:-.01em}
+.brand span{color:var(--muted);font-size:13px}
+nav{display:flex;flex-wrap:wrap;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px}
+nav button{border:0;background:none;padding:6px 13px;border-radius:999px;cursor:pointer;color:var(--muted)}
+nav button[aria-current="true"]{background:var(--text);color:var(--bg)}
+.banner{background:color-mix(in srgb,var(--warn) 14%,var(--surface));border:1px solid color-mix(in srgb,var(--warn) 40%,var(--line));padding:10px 14px;border-radius:var(--radius);margin-bottom:14px}
+
+/* Generic */
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.g3{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 10px;font-weight:600}
+.card h3{margin:0;font-size:16px}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.spread{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.chip{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.chip.danger{background:color-mix(in srgb,var(--danger) 16%,var(--surface));color:var(--danger)}
+.chip.warn{background:color-mix(in srgb,var(--warn) 16%,var(--surface));color:var(--warn)}
+.chip.ok{background:color-mix(in srgb,var(--ok) 16%,var(--surface));color:var(--ok)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--c);display:inline-block;flex:none}
+.btn{border:1px solid var(--line);background:var(--surface);padding:6px 12px;border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--text);color:var(--bg);border-color:var(--text)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:6px 12px;cursor:pointer;color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--surface2);color:var(--text);font-weight:600}
+input[type=text],input[type=date],select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;min-width:0}
+textarea{width:100%;resize:vertical;min-height:70px}
+ul.plain{list-style:none;margin:0;padding:0}
+.check{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.check:last-child{border-bottom:0}
+.check input{margin-top:3px;accent-color:var(--text);flex:none}
+.check.done .txt{text-decoration:line-through;color:var(--muted)}
+.empty{color:var(--muted);font-style:italic;padding:6px 0}
+
+/* Hoy */
+.now{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.now > div{border-radius:10px;padding:12px;background:var(--surface2)}
+.now .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.now .big{font-size:17px;font-weight:600;margin-top:2px}
+.timeline li{display:grid;grid-template-columns:92px 1fr;gap:10px;padding:6px 8px;border-radius:8px;align-items:center}
+.timeline li.cur{background:color-mix(in srgb,var(--c) 14%,var(--surface));outline:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
+.timeline li.past{opacity:.5}
+.timeline .t{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px}
+.timeline .b{display:flex;gap:8px;align-items:center;border-left:3px solid var(--c);padding-left:8px}
+.rule{font-size:15px;line-height:1.45}
+.date-item{display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
+.date-item:last-child{border-bottom:0}
+.date-item .grow{flex:1;min-width:0}
+
+/* Semana */
+.sem-tools{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sem-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+.sem{display:grid;grid-template-columns:46px repeat(7,minmax(98px,1fr));min-width:780px}
+.sem .hd{position:sticky;top:0;padding:8px 6px;text-align:center;font-weight:600;border-bottom:1px solid var(--line);background:var(--surface);font-size:13px}
+.sem .hd.today{color:var(--accent)}
+.sem .col{position:relative;border-left:1px solid var(--line)}
+.sem .col.today{background:color-mix(in srgb,var(--accent) 4%,transparent)}
+.sem .times{position:relative}
+.sem .times span{position:absolute;right:6px;font-size:11px;color:var(--muted);transform:translateY(-50%);font-variant-numeric:tabular-nums}
+.blk{position:absolute;left:3px;right:3px;border-radius:6px;padding:3px 6px;font-size:11.5px;line-height:1.25;overflow:hidden;
+  background:color-mix(in srgb,var(--c) 17%,var(--surface));border-left:3px solid var(--c)}
+.blk b{display:block;font-weight:600}
+.blk.practica{outline:1.5px dashed var(--c);outline-offset:-1.5px}
+.ptag{font-size:9.5px;letter-spacing:.04em;font-weight:700;padding:0 4px;border-radius:4px;background:var(--c);color:#fff;vertical-align:1px}
+.blk.short{padding-block:1px}
+.blk.short b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blk.short span{display:none}
+.sem .hd .zz{font-weight:400;font-size:11px;color:var(--muted);margin-top:1px}
+.sem .hd .zz.bad{color:var(--danger)}
+.blk.sueno,.blk.descanso{background:repeating-linear-gradient(135deg,transparent 0 6px,color-mix(in srgb,var(--c) 12%,transparent) 6px 7px);color:var(--muted)}
+.nowline{position:absolute;left:0;right:0;height:2px;background:var(--danger);z-index:3}
+.nowline::before{content:"";position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--danger)}
+.hours{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:14px}
+.hours .card{padding:12px}
+.hours .v{font-size:22px;font-weight:650;font-variant-numeric:tabular-nums}
+.bar{height:6px;border-radius:9px;background:var(--surface2);overflow:hidden;margin-top:6px;position:relative}
+.bar i{display:block;height:100%;background:var(--c)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+
+/* Asignaturas */
+.asig{border-top:4px solid var(--c)}
+.asig .temas li{display:flex;gap:10px;align-items:center;padding:4px 0;cursor:pointer;user-select:none}
+.asig .temas li:hover .nm{text-decoration:underline}
+.st{width:18px;height:18px;border-radius:50%;border:2px solid var(--c);flex:none;position:relative;overflow:hidden}
+.st[data-s="1"]{background:linear-gradient(90deg,var(--c) 33%,transparent 33%)}
+.st[data-s="2"]{background:linear-gradient(90deg,var(--c) 66%,transparent 66%)}
+.st[data-s="3"]{background:var(--c)}
+.eval{display:flex;height:8px;border-radius:9px;overflow:hidden;margin:6px 0 4px;gap:2px}
+.eval i{background:var(--c)}
+.pbar{height:8px;border-radius:9px;background:var(--surface2);overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--c)}
+
+/* Tareas */
+.addbar{display:grid;grid-template-columns:1fr 170px 150px auto;gap:8px}
+@media (max-width:640px){.addbar{grid-template-columns:1fr 1fr}.addbar input[type=text]{grid-column:1/-1}.now{grid-template-columns:1fr}}
+.task{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.task:last-child{border-bottom:0}
+.task .grow{flex:1;min-width:0}
+.task.done .grow .tx{text-decoration:line-through;color:var(--muted)}
+.kfocus{background:var(--surface2);border-radius:10px;padding:14px}
+.kfocus h3{font-size:18px;margin:2px 0}
+.kfocus .lbl{font-size:12px;color:var(--t-koppi);text-transform:uppercase;letter-spacing:.05em;font-weight:650}
+.kfocus textarea,.kfocus input[type=text]{width:100%}
+.klinea{display:block;margin-top:10px;padding:8px 12px;border-radius:8px;background:color-mix(in srgb,var(--t-koppi) 14%,var(--surface));color:inherit;text-decoration:none}
+.klinea b{color:var(--t-koppi)}
+.kitem{border-bottom:1px solid var(--line);padding:7px 0}
+.kitem:last-child{border-bottom:0}
+.kitem summary{display:flex;gap:8px;align-items:center;list-style:none;cursor:pointer;color:var(--text)}
+.kitem summary::-webkit-details-marker{display:none}
+.kitem .grow{flex:1;min-width:0}
+.kitem textarea{min-height:44px}
+.kst{width:14px;height:14px;border-radius:50%;border:2px solid var(--t-koppi);flex:none}
+.kitem.curso .kst{background:linear-gradient(90deg,var(--t-koppi) 50%,transparent 50%)}
+.kitem.hecho .kst{background:var(--t-koppi)}
+.kitem.hecho summary .grow{text-decoration:line-through;color:var(--muted)}
+.x{border:0;background:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px}
+.x:hover{background:var(--surface2);color:var(--danger)}
+details summary{cursor:pointer;color:var(--muted)}
+footer{margin-top:28px;color:var(--muted);font-size:12.5px;display:flex;flex-wrap:wrap;gap:6px 16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand" style="flex-wrap:wrap"><h1>Comodín</h1><span id="sub"></span><span id="sync" class="sync local">Solo este dispositivo</span></div>
+    <nav id="nav"></nav>
+  </header>
+  <div id="banner"></div>
+  <main id="app"></main>
+  <footer id="foot"></footer>
+</div>
+
+<script src="datos.js"></script>
+<script>
+const D = window.DATOS;
+const KEY = "comodin.v1";
+const DEF = { modo: "normal", temas: {}, tareas: [], repaso: {}, revision: {}, tocado: {}, habitos: {} };
+let S = load();
+
+function load(){
+  try { return Object.assign(structuredClone(DEF), JSON.parse(localStorage.getItem(KEY) || "{}")); }
+  catch(e){ return structuredClone(DEF); }
+}
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){}
+  try { window.alGuardar?.(S); } catch(e){ console.error("[sync]", e); }
+}
+// Puente con sync.js: los cambios que llegan de otros dispositivos
+window.getS = () => S;
+window.aplicarRemoto = fn => {
+  fn(S);
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){}
+  programarRender();
+};
+// No redibujar mientras se escribe (se pierde lo tecleado): se pospone hasta salir del campo
+let renderPendiente = false;
+const escribiendo = () => { const a = document.activeElement; return !!(a && a.matches("input,textarea,select") && !a.closest("#login")); };
+function programarRender(){ if (escribiendo()) renderPendiente = true; else if (typeof render === "function") render(); }
+document.addEventListener("focusout", () => setTimeout(() => { if (renderPendiente && !escribiendo()){ renderPendiente = false; render(); } }, 0));
+
+// ---------- utilidades ----------
+const pad = n => String(n).padStart(2, "0");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const DIAS = ["", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+const DIAS_C = ["", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const hoy = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const addDias = (d, n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+const diaSem = d => d.getDay() || 7;
+const entre = (a, b) => Math.round((b - a) / 86400000);
+const min = t => { const [h,m] = t.split(":").map(Number); return h*60 + m; };
+const hm = m => `${pad(Math.floor(m/60))}:${pad(m%60)}`;
+const fechaLarga = d => `${DIAS[diaSem(d)].toLowerCase()} ${d.getDate()} de ${MESES[d.getMonth()]}`;
+const fechaCorta = d => `${DIAS_C[diaSem(d)]} ${d.getDate()} ${MESES[d.getMonth()].slice(0,3)}`;
+function semanaISO(d){
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - day);
+  const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  return `${t.getUTCFullYear()}-S${pad(Math.ceil(((t - y0) / 86400000 + 1) / 7))}`;
+}
+const lunesDe = d => addDias(d, -(diaSem(d) - 1));
+
+const A = Object.fromEntries(D.asignaturas.map(a => [a.id, a]));
+const TIPOS = {
+  clase:     { n: "Clases",        c: "var(--t-clase)" },
+  estudio:   { n: "Estudio",       c: "var(--t-estudio)" },
+  actividad: { n: "Tareas",        c: "var(--t-actividad)" },
+  koppi:     { n: "Koppi",         c: "var(--t-koppi)" },
+  revision:  { n: "Planificación", c: "var(--t-revision)" },
+  deporte:   { n: "Gym",           c: "var(--t-deporte)" },
+  descanso:  { n: "Descanso",      c: "var(--t-descanso)" },
+  sueno:     { n: "Sueño",         c: "var(--t-sueno)" },
+};
+const MODOS = {
+  normal:   { n: "Normal",    d: "Koppi por la noche y entre clases, tareas de prácticas por la tarde, gym 19:30." },
+  entregas: { n: "Entregas",  d: "Semana cargada de prácticas: más tarde para tareas, Koppi baja un poco." },
+  examenes: { n: "Exámenes",  d: "Periodo de exámenes sin clases: estudio de día, Koppi en mantenimiento." },
+};
+const ESTADOS = ["Pendiente", "Apuntes hechos", "Repasado", "Dominado"];
+const REGLAS = [
+  "Cuando manden una tarea, apúntala en ese momento: asignatura + «próxima práctica». Diez segundos.",
+  "Tarea que vence mañana = primer rato de la tarde. Koppi espera a la noche.",
+  "Los huecos entre clases son para Koppi en cosas cortas: responder, revisar, decidir. Lo profundo, por la noche.",
+  "Un bloque de Koppi = una sola tarea concreta, decidida antes de sentarte.",
+  "En clase, las ideas de Koppi van a Ideas aparcadas, no al portátil.",
+  "Una práctica larga se parte en pasos el mismo día que la mandan, no la noche antes.",
+  "A las 23:00 se cierra el portátil: mañana suena a las 6:30.",
+  "Si un bloque se cae, no lo persigas: se recoloca en la revisión del domingo.",
+  "Móvil fuera de la mesa durante los bloques de foco.",
+  "Antes de dormir, mira qué tareas vencen mañana.",
+];
+const colorDe = b => b.tipo === "clase" ? (A[b.asig]?.color || TIPOS.clase.c) : (TIPOS[b.tipo]?.c || "var(--muted)");
+const asigNombre = id => id === "koppi" ? "Koppi" : (A[id]?.nombre || id || "");
+const asigColor = id => id === "koppi" ? "var(--t-koppi)" : (A[id]?.color || "var(--muted)");
+
+function bloquesDia(dia, modo = S.modo){
+  const clases = modo === "examenes" ? [] : (D.horario || []).filter(h => h.dias.includes(dia)).map(h => ({
+    inicio: h.inicio, fin: h.fin, tipo: "clase", asig: h.asig,
+    titulo: A[h.asig]?.sigla || A[h.asig]?.nombre || h.asig, practica: h.tipo === "practica",
+    detalle: [h.tipo === "practica" ? "Práctica" : h.tipo === "teoria" ? "Teoría" : "",
+              A[h.asig] && A[h.asig].nombre !== A[h.asig].sigla ? A[h.asig].nombre : ""].filter(Boolean).join(" · ")
+  }));
+  const otros = (D.bloques[modo] || []).filter(b => b.dias.includes(dia));
+  return [...clases, ...otros].sort((a, b) => min(a.inicio) - min(b.inicio));
+}
+function horasSemana(modo = S.modo){
+  const h = {};
+  for (let d = 1; d <= 7; d++) for (const b of bloquesDia(d, modo)) h[b.tipo] = (h[b.tipo] || 0) + (min(b.fin) - min(b.inicio)) / 60;
+  return h;
+}
+function tocar(id){ if (A[id]) S.tocado[id] = ymd(hoy()); }
+
+// ---------- sueño ----------
+const fmtH = h => String(+h.toFixed(1)).replace(".", ",");
+// Noche que empieza el día `dia` (1-7)
+function suenoNoche(dia, modo = S.modo){
+  const s = D.sueno && (D.sueno[modo] || D.sueno.normal)?.[dia]; if (!s) return null;
+  let cama = min(s[0]); if (cama < 12*60) cama += 1440;   // 00:30 = pasada la medianoche
+  const horas = (min(s[1]) + 1440 - cama) / 60;
+  const obj = (dia === 5 || dia === 6) ? D.sueno.objetivo.finde : D.sueno.objetivo.semana;
+  return { cama: s[0], despertar: s[1], camaMin: cama, despMin: min(s[1]), horas, obj, ok: horas >= obj };
+}
+function avisosSueno(modo = S.modo){
+  const av = [];
+  for (let d = 1; d <= 7; d++){
+    const n = suenoNoche(d, modo); if (!n) continue;
+    if (!n.ok) av.push(`${DIAS[d]} noche: ${fmtH(n.horas)} h de sueño (objetivo ${n.obj} h).`);
+    for (const b of bloquesDia(d, modo).filter(b => b.tipo !== "sueno" && min(b.fin) > n.camaMin))
+      av.push(`${DIAS[d]}: «${b.titulo}» acaba a las ${b.fin}, pasada la hora de dormir (${n.cama}).`);
+    const sig = d % 7 + 1;
+    for (const b of bloquesDia(sig, modo).filter(b => min(b.inicio) < n.despMin))
+      av.push(`${DIAS[sig]}: «${b.titulo}» empieza a las ${b.inicio}, antes del despertador (${n.despertar}).`);
+  }
+  return av;
+}
+function chipDias(n){
+  if (n < 0) return `<span class="chip">hace ${-n} d</span>`;
+  if (n === 0) return `<span class="chip danger">hoy</span>`;
+  if (n === 1) return `<span class="chip danger">mañana</span>`;
+  const cls = n <= 3 ? "danger" : n <= 7 ? "warn" : "";
+  return `<span class="chip ${cls}">en ${n} días</span>`;
+}
+
+// ---------- tareas: vencimientos ----------
+// Próxima sesión de una asignatura (tipo "practica" o cualquiera) que empiece después de `desde`.
+function proximaSesion(asig, soloPracticas, desde = new Date()){
+  for (let i = 0; i <= 21; i++){
+    const d = addDias(hoy(), i);
+    const ses = (D.horario || []).filter(h => h.asig === asig && h.dias.includes(diaSem(d)) && (!soloPracticas || h.tipo === "practica"))
+      .sort((a, b) => min(a.inicio) - min(b.inicio));
+    for (const s of ses){
+      const t = new Date(d); t.setMinutes(min(s.inicio));
+      if (t > desde) return { fecha: ymd(d), hora: s.inicio, practica: s.tipo === "practica" };
+    }
+  }
+  return null;
+}
+const tienePracticas = asig => (D.horario || []).some(h => h.asig === asig && h.tipo === "practica");
+// Calcula fecha/hora según lo elegido en el formulario
+function calcularVence(cat, vence, fecha, hora){
+  if (vence === "nada") return { fecha: "", hora: "" };
+  if (vence === "fecha") return { fecha: fecha || "", hora: hora || "" };
+  if (!A[cat]) return null;
+  const soloP = vence === "practica" && tienePracticas(cat);
+  const s = proximaSesion(cat, soloP);
+  return s ? { fecha: s.fecha, hora: s.hora, sesion: soloP ? "práctica" : "clase" } : null;
+}
+const venceDate = t => { if (!t.fecha) return null; const d = parse(t.fecha); if (t.hora) d.setMinutes(min(t.hora)); else d.setHours(23, 59); return d; };
+function chipVence(t){
+  const d = venceDate(t); if (!d) return `<span class="chip">sin fecha</span>`;
+  const horas = (d - new Date()) / 3600000;
+  if (horas < 0) return `<span class="chip danger">vencida</span>`;
+  if (horas < 24 && t.hora) return `<span class="chip danger">en ${Math.max(1, Math.round(horas))} h</span>`;
+  return chipDias(entre(hoy(), parse(t.fecha)));
+}
+const ordenTareas = (a, b) => ((a.fecha || "9") + (a.hora || "99")).localeCompare((b.fecha || "9") + (b.hora || "99"));
+
+let capt = { cat: "", vence: "practica" };
+function formCaptura(){
+  return `<form class="capt" data-form="tarea">
+    <input type="text" name="texto" placeholder="Qué han mandado (p. ej. Práctica 1 de TAL)" required autocomplete="off">
+    <select name="cat" data-act="capt">${opcionesCat(capt.cat)}</select>
+    <select name="vence" data-act="capt">
+      <option value="practica" ${capt.vence === "practica" ? "selected" : ""}>Vence: próxima práctica</option>
+      <option value="clase" ${capt.vence === "clase" ? "selected" : ""}>Vence: próxima clase</option>
+      <option value="fecha" ${capt.vence === "fecha" ? "selected" : ""}>Vence: elegir fecha</option>
+      <option value="nada" ${capt.vence === "nada" ? "selected" : ""}>Sin fecha</option>
+    </select>
+    <input type="date" name="fecha" data-act="capt" ${capt.vence === "fecha" ? "" : "hidden"}>
+    <input type="time" name="hora" data-act="capt" ${capt.vence === "fecha" ? "" : "hidden"}>
+    <button class="btn primary">Añadir</button>
+    <div class="prev small muted" style="flex-basis:100%">${textoPrevia()}</div>
+  </form>`;
+}
+function textoPrevia(fecha = "", hora = ""){
+  const r = calcularVence(capt.cat, capt.vence, fecha, hora);
+  if (capt.vence === "nada") return "Irá a la bandeja, sin fecha.";
+  if (capt.vence === "fecha") return fecha ? `Vence el ${fechaCorta(parse(fecha))}${hora ? ` a las ${hora}` : ""}.` : "Elige la fecha límite.";
+  if (!r) return A[capt.cat] ? "No hay clases de esta asignatura en el horario." : "Elige la asignatura para calcular la fecha.";
+  const aviso = capt.vence === "practica" && r.sesion === "clase" ? ` (${A[capt.cat].sigla} no tiene prácticas: se usa la próxima clase)` : "";
+  return `→ Vence el <b>${fechaCorta(parse(r.fecha))} a las ${r.hora}</b>, próxima ${r.sesion} de ${esc(A[capt.cat].sigla || A[capt.cat].nombre)}${aviso}.`;
+}
+
+// ---------- vistas ----------
+const VISTAS = { hoy: "Hoy", semana: "Semana", tareas: "Tareas", koppi: "Koppi", asignaturas: "Asignaturas", fechas: "Fechas", revision: "Revisión" };
+let vista = (location.hash.slice(1) in VISTAS) ? location.hash.slice(1) : "hoy";
+
+function render(){
+  document.getElementById("nav").innerHTML = Object.entries(VISTAS)
+    .map(([k, n]) => `<button data-act="vista" data-v="${k}" aria-current="${k === vista}">${n}</button>`).join("");
+  const c = D.cuatrimestre, h = hoy();
+  const semN = entre(parse(c.inicio), h) >= 0 ? Math.floor(entre(parse(c.inicio), h) / 7) + 1 : null;
+  document.getElementById("sub").textContent = `${D.curso} · ${c.nombre}${semN && h <= parse(c.finExamenes) ? ` · semana ${semN}` : ""} · modo ${MODOS[S.modo].n.toLowerCase()}`;
+  document.getElementById("banner").innerHTML = (D.pendientes || []).length
+    ? `<details class="banner"><summary><b>Faltan datos por completar (${D.pendientes.length})</b> · pásaselos a Claude y se rellenan en <code>datos.js</code></summary>
+        <ul style="margin:6px 0 0;padding-left:20px">${D.pendientes.map(p => `<li>${esc(p)}</li>`).join("")}</ul></details>` : "";
+  document.getElementById("app").innerHTML = ({ hoy: vHoy, semana: vSemana, koppi: vKoppi, asignaturas: vAsignaturas, fechas: vFechas, tareas: vTareas, revision: vRevision })[vista]();
+  document.getElementById("foot").innerHTML = `
+    <span>Método, notas de asignaturas, inventario de Koppi y gym: carpeta <b>timetable</b> de tu ordenador.</span>`;
+}
+
+function vHoy(){
+  const h = hoy(), dia = diaSem(h), ahora = new Date(), nm = ahora.getHours()*60 + ahora.getMinutes();
+  const bl = bloquesDia(dia);
+  const act = bl.find(b => min(b.inicio) <= nm && nm < min(b.fin));
+  const sig = bl.find(b => min(b.inicio) > nm);
+  const noche = suenoNoche(dia);
+  const regla = REGLAS[(entre(new Date(2026,0,1), h) % REGLAS.length + REGLAS.length) % REGLAS.length];
+
+  // Repaso 24h: clases de hoy + pendientes de los 4 días anteriores
+  const conRepaso = D.repaso24h !== false;
+  const repasoHoy = S.modo === "examenes" || !conRepaso ? [] : [...new Set(bloquesDia(dia, "normal").filter(b => b.tipo === "clase").map(b => b.asig))];
+  const pendientes = [];
+  if (S.modo !== "examenes" && conRepaso) for (let i = 1; i <= 4; i++){
+    const d = addDias(h, -i); if (d < parse(D.cuatrimestre.inicio)) break;
+    for (const id of new Set(bloquesDia(diaSem(d), "normal").filter(b => b.tipo === "clase").map(b => b.asig)))
+      if (!S.repaso[ymd(d)]?.[id]) pendientes.push({ d, id });
+  }
+  const itemRepaso = (d, id, extra = "") => {
+    const hecho = !!S.repaso[ymd(d)]?.[id];
+    return `<label class="check ${hecho ? "done" : ""}"><input type="checkbox" data-act="repaso" data-f="${ymd(d)}" data-id="${id}" ${hecho ? "checked" : ""}>
+      <span class="dot" style="--c:${asigColor(id)};margin-top:5px"></span><span class="txt">${esc(asigNombre(id))} ${extra}</span></label>`;
+  };
+
+  const prox = D.fechas.filter(f => parse(f.fecha) >= h).sort((a, b) => a.fecha.localeCompare(b.fecha)).slice(0, 6);
+  const conFecha = S.tareas.filter(t => !t.hecha && t.fecha).sort(ordenTareas);
+  const sinFecha = S.tareas.filter(t => !t.hecha && !t.fecha).length;
+  const blkNom = b => b ? `<span class="dot" style="--c:${colorDe(b)}"></span> ${esc(b.titulo)}` : "—";
+
+  return `
+  <div class="grid g2">
+    <div class="card">
+      <h2>${fechaLarga(h)}</h2>
+      <div class="now">
+        <div><div class="lbl">Ahora${act ? ` · hasta ${act.fin}` : ""}</div><div class="big row">${act ? blkNom(act) : "Hueco libre"}</div></div>
+        <div><div class="lbl">Siguiente${sig ? ` · ${sig.inicio}` : ""}</div><div class="big row">${sig ? blkNom(sig) : "Nada más hoy"}</div></div>
+      </div>
+      ${kLineaHoy(act, sig)}
+      ${noche ? `<div class="small" style="margin-top:10px;padding:8px 12px;border-radius:8px;background:var(--surface2)">🌙 Esta noche: a la cama a las <b>${noche.cama}</b> · suena a las <b>${noche.despertar}</b> · ${fmtH(noche.horas)} h</div>` : ""}
+      <ul class="plain timeline" style="margin-top:12px">
+        ${bl.length ? bl.map(b => {
+          const cur = b === act, past = min(b.fin) <= nm;
+          return `<li class="${cur ? "cur" : ""} ${past ? "past" : ""}" style="--c:${colorDe(b)}">
+            <span class="t">${b.inicio}–${b.fin}</span>
+            <span class="b">${esc(b.titulo)}${b.detalle ? `<span class="muted small">· ${esc(b.detalle)}</span>` : ""}</span></li>`;
+        }).join("") : `<li class="empty">Día sin bloques.</li>`}
+      </ul>
+    </div>
+
+    <div class="grid" style="align-content:start">
+      <div class="card">
+        <div class="spread"><h2>Tareas pendientes</h2><a href="#tareas" data-act="vista" data-v="tareas" class="small">Todas${sinFecha ? ` (${sinFecha} sin fecha)` : ""}</a></div>
+        ${formCaptura()}
+        <div style="margin-top:8px">${conFecha.length ? conFecha.slice(0, 8).map(itemTarea).join("") : `<div class="empty">Nada pendiente. Cuando manden algo, apúntalo aquí.</div>`}</div>
+      </div>
+      ${(D.habitos || []).length ? `<div class="card"><h2>Hábitos</h2>${D.habitos.map(hb => itemHabito(hb, h)).join("")}</div>` : ""}
+      ${conRepaso ? `<div class="card">
+        <h2>Repaso 24h</h2>
+        ${repasoHoy.length ? repasoHoy.map(id => itemRepaso(h, id)).join("") : `<div class="empty">${S.modo === "examenes" ? "En modo exámenes no hay repaso de clases." : "Hoy no hay clases."}</div>`}
+        ${pendientes.length ? `<div class="small muted" style="margin-top:10px">Pendiente de días anteriores</div>
+          ${pendientes.map(p => itemRepaso(p.d, p.id, `<span class="muted small">· ${fechaCorta(p.d)}</span>`)).join("")}` : ""}
+      </div>` : ""}
+      <div class="card">
+        <h2>Regla del día</h2>
+        <div class="rule">${esc(regla)}</div>
+      </div>
+      ${prox.length ? `<div class="card">
+        <div class="spread"><h2>Próximas fechas</h2><a href="#fechas" data-act="vista" data-v="fechas" class="small">Ver todas</a></div>
+        ${prox.map(itemFecha).join("")}
+      </div>` : ""}
+    </div>
+  </div>`;
+}
+
+function racha(hb){
+  let d = hoy(), n = 0;
+  if (!S.habitos[ymd(d)]?.[hb.id]) d = addDias(d, -1); // hoy aún no rompe la racha
+  for (let i = 0; i < 500; i++, d = addDias(d, -1)){
+    if (!hb.dias.includes(diaSem(d))) continue;
+    if (S.habitos[ymd(d)]?.[hb.id]) n++; else break;
+  }
+  return n;
+}
+function itemHabito(hb, h){
+  const toca = hb.dias.includes(diaSem(h));
+  const hecho = !!S.habitos[ymd(h)]?.[hb.id];
+  const lun = lunesDe(h);
+  const semHechos = hb.dias.filter(d => S.habitos[ymd(addDias(lun, d-1))]?.[hb.id]).length;
+  const r = racha(hb);
+  const sub = hb.porDia?.[diaSem(h)] || hb.detalle || "";
+  if (!toca) return `<div class="check" style="cursor:default"><input type="checkbox" disabled>
+    <span class="txt muted">${esc(hb.titulo)} · hoy descanso</span><span class="chip" style="margin-left:auto">semana ${semHechos}/${hb.dias.length}</span></div>`;
+  return `<label class="check ${hecho ? "done" : ""}"><input type="checkbox" data-act="habito" data-id="${hb.id}" ${hecho ? "checked" : ""}>
+    <span style="flex:1"><span class="txt">${esc(hb.titulo)}</span>${sub ? `<span class="muted small"> · ${esc(sub)}</span>` : ""}</span>
+    <span class="row" style="gap:6px;flex:none">${r ? `<span class="chip ${r >= 7 ? "ok" : ""}" title="Racha">🔥 ${r}</span>` : ""}<span class="chip">semana ${semHechos}/${hb.dias.length}</span></span></label>`;
+}
+
+function itemFecha(f){
+  const h = hoy(), d = parse(f.fecha), n = entre(h, d);
+  const interna = f.tipo === "entrega" ? addDias(d, -(D.margenEntregas || 0)) : null;
+  const tipoChip = { entrega: "Entrega", examen: "Examen", hito: "Hito" }[f.tipo] || f.tipo;
+  return `<div class="date-item" style="${n < 0 ? "opacity:.5" : ""}">
+    <span class="dot" style="--c:${asigColor(f.asig)}"></span>
+    <div class="grow"><div><b>${esc(f.titulo)}</b></div>
+      <div class="small muted">${esc(asigNombre(f.asig))} · ${tipoChip} · ${fechaCorta(d)}${interna && n >= 0 ? ` · <span title="Fecha objetivo interna">terminar el ${fechaCorta(interna)}</span>` : ""}</div></div>
+    ${chipDias(n)}</div>`;
+}
+
+function vSemana(){
+  const h = hoy(), hd = diaSem(h), lun = lunesDe(h);
+  const todos = []; for (let d = 1; d <= 7; d++) todos.push(bloquesDia(d));
+  const flat = todos.flat();
+  const ini = Math.floor(Math.min(8*60, ...flat.map(b => min(b.inicio))) / 60);
+  const fin = Math.ceil(Math.max(21*60, ...flat.map(b => min(b.fin))) / 60);
+  const PX = 46, alto = (fin - ini) * PX;
+  const y = m => (m - ini*60) / 60 * PX;
+  const ahora = new Date(), nm = ahora.getHours()*60 + ahora.getMinutes();
+
+  const col = (d, bl) => {
+    // carriles para bloques que se solapan
+    const lanes = []; const pos = bl.map(b => {
+      let l = lanes.findIndex(end => end <= min(b.inicio)); if (l < 0){ l = lanes.length; lanes.push(0); }
+      lanes[l] = min(b.fin); return l;
+    });
+    const n = Math.max(1, lanes.length);
+    return `<div class="col ${d === hd ? "today" : ""}" style="height:${alto}px;background-image:repeating-linear-gradient(to bottom,var(--line) 0 1px,transparent 1px ${PX}px)">
+      ${bl.map((b, i) => `<div class="blk ${b.tipo} ${b.practica ? "practica" : ""} ${min(b.fin) - min(b.inicio) < 50 ? "short" : ""}" style="--c:${colorDe(b)};top:${y(min(b.inicio))+1}px;height:${y(min(b.fin))-y(min(b.inicio))-2}px;${n > 1 ? `left:calc(${pos[i]/n*100}% + 2px);right:auto;width:calc(${100/n}% - 4px)` : ""}" title="${b.inicio}–${b.fin} · ${esc(b.titulo)}">
+        <b>${esc(b.titulo)}${b.practica ? ` <span class="ptag">PRÁCTICA</span>` : ""}</b><span class="muted">${b.inicio}–${b.fin}${b.detalle && b.tipo !== "clase" ? " · " + esc(b.detalle) : ""}</span></div>`).join("")}
+      ${d === hd && nm >= ini*60 && nm <= fin*60 ? `<div class="nowline" style="top:${y(nm)}px"></div>` : ""}
+    </div>`;
+  };
+
+  const hrs = horasSemana(), obj = D.objetivos[S.modo] || {};
+  const est = (hrs.estudio || 0) + (hrs.actividad || 0);
+  const tile = (nombre, v, rango, c) => {
+    const ok = rango ? (v >= rango[0] && v <= rango[1]) : null;
+    return `<div class="card" style="--c:${c}"><div class="spread"><span class="muted small">${nombre}</span>${rango ? `<span class="chip ${ok ? "ok" : "warn"}">obj. ${rango[0]}–${rango[1]} h</span>` : ""}</div>
+      <div class="v">${+v.toFixed(1)} h</div>${rango ? `<div class="bar"><i style="width:${Math.min(100, v / rango[1] * 100)}%"></i></div>` : ""}</div>`;
+  };
+
+  return `
+  <div class="sem-tools">
+    <div class="row">
+      <div class="seg">${Object.entries(MODOS).map(([k, m]) => `<button data-act="modo" data-m="${k}" aria-pressed="${S.modo === k}">${m.n}</button>`).join("")}</div>
+      <span class="muted small">${MODOS[S.modo].d}</span>
+    </div>
+    <div class="legend">${Object.entries(TIPOS).map(([k, t]) => `<span><i class="dot" style="--c:${t.c}"></i>${t.n}</span>`).join("")}</div>
+  </div>
+  <div class="sem-scroll"><div class="sem">
+    <div class="hd"></div>
+    ${[1,2,3,4,5,6,7].map(d => { const n = suenoNoche(d);
+      return `<div class="hd ${d === hd ? "today" : ""}">${DIAS_C[d]} ${addDias(lun, d-1).getDate()}
+        ${n ? `<div class="zz ${n.ok ? "" : "bad"}" title="Esta noche: cama ${n.cama}, despertador ${n.despertar}">🌙 ${n.cama} · ${fmtH(n.horas)} h</div>` : ""}</div>`; }).join("")}
+    <div class="times" style="height:${alto}px">${Array.from({length: fin - ini}, (_, i) => i ? `<span style="top:${i*PX}px">${pad(ini+i)}</span>` : "").join("")}</div>
+    ${todos.map((bl, i) => col(i+1, bl)).join("")}
+  </div></div>
+  <div class="hours">
+    ${tile("Koppi", hrs.koppi || 0, obj.koppi, TIPOS.koppi.c)}
+    ${tile("Tareas + estudio", est, obj.estudio, TIPOS.actividad.c)}
+    ${tile("Clases", hrs.clase || 0, null, TIPOS.clase.c)}
+    ${tile("Gym", hrs.deporte || 0, null, TIPOS.deporte.c)}
+    ${D.sueno ? (() => { const ns = [1,2,3,4,5,6,7].map(d => suenoNoche(d)).filter(Boolean); const tot = ns.reduce((s, n) => s + n.horas, 0);
+      const okN = ns.filter(n => n.ok).length;
+      return `<div class="card" style="--c:var(--t-sueno)"><div class="spread"><span class="muted small">Sueño</span><span class="chip ${okN === ns.length ? "ok" : "warn"}">${okN}/${ns.length} noches ok</span></div>
+        <div class="v">${fmtH(tot)} h</div><div class="small muted">7 h entre semana · 8 h vie y sáb</div></div>`; })() : ""}
+  </div>
+  ${(() => { const av = avisosSueno(); return av.length ? `<div class="banner" style="margin-top:14px"><b>Conflictos con el sueño</b><ul style="margin:6px 0 0;padding-left:20px">${av.map(a => `<li>${esc(a)}</li>`).join("")}</ul></div>` : ""; })()}`;
+}
+
+function vAsignaturas(){
+  const h = hoy();
+  const card = a => {
+    const st = S.temas[a.id] || [];
+    const total = a.temas.length * 3, hecho = a.temas.reduce((s, _, i) => s + (st[i] || 0), 0);
+    const pct = total ? Math.round(hecho / total * 100) : 0;
+    const prox = D.fechas.filter(f => f.asig === a.id && parse(f.fecha) >= h).sort((x, y) => x.fecha.localeCompare(y.fecha))[0];
+    const proxP = proximaSesion(a.id, tienePracticas(a.id));
+    const tareasA = S.tareas.filter(t => t.cat === a.id && !t.hecha).sort(ordenTareas);
+    const clases = D.horario.filter(x => x.asig === a.id);
+    const hClase = clases.reduce((s, x) => s + x.dias.length * (min(x.fin) - min(x.inicio)) / 60, 0);
+    const tocado = S.tocado[a.id] ? entre(parse(S.tocado[a.id]), h) : null;
+    return `<div class="card asig" style="--c:${a.color}">
+      <div class="spread"><h3>${a.sigla && a.sigla !== a.nombre ? `${esc(a.sigla)} <span class="muted" style="font-weight:400;font-size:14px">${esc(a.nombre)}</span>` : esc(a.nombre)}</h3>
+        <span class="chip">${esc(a.grado)}${a.creditos ? ` · ${a.creditos} ECTS` : ""}</span></div>
+      <div class="small muted" style="margin:4px 0 10px">${hClase} h de clase/semana${a.profesor ? ` · ${esc(a.profesor)}` : ""}${a.tutorias ? ` · tutorías ${esc(a.tutorias)}` : ""}
+        ${tocado === null ? "" : tocado > 5 ? ` · <span style="color:var(--danger)">${tocado} días sin tocar</span>` : ` · tocada ${tocado ? `hace ${tocado} d` : "hoy"}`}</div>
+      ${a.temas.length ? `<div class="spread small"><span>Progreso del temario</span><b>${pct}%</b></div>
+      <div class="pbar"><i style="width:${pct}%"></i></div>` : `<div class="empty small">Temario pendiente: pásale la guía docente a Claude.</div>`}
+      <ul class="plain temas" style="margin:12px 0">
+        ${a.temas.map((t, i) => `<li data-act="tema" data-id="${a.id}" data-i="${i}" title="${ESTADOS[st[i] || 0]} · clic para avanzar">
+          <span class="st" data-s="${st[i] || 0}"></span><span class="nm">${i+1}. ${esc(t)}</span><span class="muted small" style="margin-left:auto">${st[i] ? ESTADOS[st[i]] : ""}</span></li>`).join("")}
+      </ul>
+      <div class="small muted">Evaluación</div>
+      ${a.evaluacion.length ? `<div class="eval">${a.evaluacion.map(([n, p], i) => `<i style="flex:${p};opacity:${Math.max(.3, 1 - i*0.25)}" title="${esc(n)} ${p}%"></i>`).join("")}</div>
+      <div class="small">${a.evaluacion.map(([n, p]) => `${esc(n)} <b>${p}%</b>`).join(" · ")}</div>` : `<div class="empty small">Por completar.</div>`}
+      ${tareasA.length ? `<div class="small muted" style="margin-top:12px">Tareas pendientes</div>${tareasA.map(itemTarea).join("")}` : ""}
+      <div class="spread small" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line)">
+        <span>${prox ? `Próximo: ${esc(prox.titulo)} ${chipDias(entre(h, parse(prox.fecha)))}`
+          : proxP ? `Próxima ${proxP.practica ? "práctica" : "clase"}: <b>${fechaCorta(parse(proxP.fecha))} ${proxP.hora}</b>` : `<span class="muted">Sin clases</span>`}</span>
+        ${a.nota ? `<a href="${esc(a.nota)}" style="white-space:nowrap">Apuntes →</a>` : ""}
+      </div>
+    </div>`;
+  };
+  const grupos = [...new Set(D.asignaturas.map(a => a.grado))];
+  return `<p class="muted small" style="margin-top:0">Cada asignatura muestra sus tareas pendientes y su próxima práctica. Si añades temario, clic en un tema para avanzar su estado.</p>
+    ${grupos.map(g => `<h2 class="muted" style="font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin:18px 0 10px">${g === "INF" ? "Ingeniería Informática" : g === "ADE" ? "ADE" : esc(g)}</h2>
+      <div class="grid g3">${D.asignaturas.filter(a => a.grado === g).map(card).join("")}</div>`).join("")}`;
+}
+
+function vFechas(){
+  const h = hoy(), c = D.cuatrimestre;
+  const orden = [...D.fechas].sort((a, b) => a.fecha.localeCompare(b.fecha));
+  const meses = {};
+  for (const f of orden){ const k = f.fecha.slice(0, 7); (meses[k] ||= []).push(f); }
+  const hito = (nombre, f) => { const n = entre(h, parse(f)); return `<div class="card"><div class="muted small">${nombre}</div><div class="spread"><b>${fechaCorta(parse(f))}</b>${chipDias(n)}</div></div>`; };
+  return `
+  <div class="hours" style="margin-top:0;margin-bottom:14px">
+    ${hito("Fin de clases", c.finClases)}${hito("Fin de exámenes", c.finExamenes)}
+    <div class="card"><div class="muted small">Entregas pendientes</div><div class="v">${orden.filter(f => f.tipo === "entrega" && parse(f.fecha) >= h).length}</div></div>
+    <div class="card"><div class="muted small">Exámenes pendientes</div><div class="v">${orden.filter(f => f.tipo === "examen" && parse(f.fecha) >= h).length}</div></div>
+  </div>
+  <div class="grid g2">
+    ${orden.length ? Object.entries(meses).map(([k, fs]) => { const [yy, mm] = k.split("-").map(Number);
+      return `<div class="card"><h2>${MESES[mm-1]} ${yy}</h2>${fs.map(itemFecha).join("")}</div>`; }).join("")
+      : `<div class="card"><div class="empty">Aún no hay fechas. Pásale a Claude las entregas y exámenes (de PoliformaT o las guías docentes).</div></div>`}
+  </div>
+  <p class="muted small">Las entregas muestran una fecha interna ${D.margenEntregas} días antes de la oficial. Para añadir fechas, edita <code>fechas</code> en datos.js.</p>`;
+}
+
+// ---------- KOPPI: gameplan ----------
+const FASES = [
+  { id: 1, n: "Terminar lo empezado", d: "Lo que está a medias, hasta dejarlo cerrado." },
+  { id: 2, n: "Páginas nuevas", d: "Las páginas que faltan para la v1." },
+  { id: 3, n: "Pulido y lanzamiento", d: "Bugs, textos, móvil, publicar." },
+];
+const TAMS = { S: { n: "S · 30 min", max: 30 }, M: { n: "M · hasta 1,5 h", max: 90 }, L: { n: "L · 2–3 h", max: 180 } };
+const TIPOS_K = { pagina: "Página", terminar: "Terminar", bug: "Bug", pulido: "Pulido", otro: "Otro" };
+const DOD_PAGINA = ["Estructura y diseño", "Datos conectados", "Estados: vacío, cargando y error", "Se ve bien en móvil", "Probada de principio a fin"];
+const ESTADOS_K = { pendiente: "Pendiente", curso: "A medias", hecho: "Hecha" };
+const K = () => {
+  const k = (S.koppi ||= {});
+  k.items ||= []; k.sesiones ||= []; k.criterios ||= []; k.objetivo ??= ""; k.fecha ??= ""; k.activa ??= null;
+  return k;
+};
+const kid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+let kSalto = 0;
+const kAbiertos = new Set();
+
+// Bloque de Koppi en curso o el siguiente (hasta una semana vista)
+function kBloque(){
+  const ahora = new Date(), nm = ahora.getHours()*60 + ahora.getMinutes();
+  for (let i = 0; i < 8; i++){
+    const d = addDias(hoy(), i);
+    for (const b of bloquesDia(diaSem(d)).filter(b => b.tipo === "koppi")){
+      if (i === 0 && min(b.fin) <= nm) continue;
+      const enCurso = i === 0 && min(b.inicio) <= nm;
+      return { b, d, enCurso, quedan: min(b.fin) - (enCurso ? nm : min(b.inicio)), dur: min(b.fin) - min(b.inicio) };
+    }
+  }
+  return null;
+}
+// Tareas no hechas: primero las que están a medias, luego por fase y orden. Filtra las que caben en `minutos`.
+function kSugerencias(minutos){
+  const orden = K().items.map((it, i) => ({ it, i })).filter(x => x.it.estado !== "hecho")
+    .sort((a, b) => (a.it.estado === "curso" ? 0 : 1) - (b.it.estado === "curso" ? 0 : 1) || a.it.fase - b.it.fase || a.i - b.i)
+    .map(x => x.it);
+  if (!minutos) return { lista: orden, caben: true };
+  const caben = orden.filter(it => it.tam === "L" ? minutos >= 120 : TAMS[it.tam].max <= minutos);
+  return caben.length ? { lista: caben, caben: true } : { lista: orden, caben: false };
+}
+function kLineaHoy(act, sig){
+  const b = act?.tipo === "koppi" ? act : sig?.tipo === "koppi" ? sig : null;
+  if (!b) return "";
+  const k = K(), activa = k.items.find(i => i.id === k.activa);
+  const it = activa || kSugerencias(min(b.fin) - min(b.inicio)).lista[0];
+  return `<a href="#koppi" data-act="vista" data-v="koppi" class="klinea small">
+    <b>Koppi ${b === act ? "ahora" : "a las " + b.inicio}:</b> ${it ? esc(it.titulo) + (it.siguiente ? ` <span class="muted">→ ${esc(it.siguiente)}</span>` : "") : "aún no hay gameplan, ábrelo aquí →"}</a>`;
+}
+function chipsItem(it){
+  return `<div class="row" style="gap:6px;margin:4px 0"><span class="chip">${TAMS[it.tam]?.n || it.tam}</span><span class="chip">${TIPOS_K[it.tipo] || it.tipo}</span>
+    <span class="chip">Fase ${it.fase}</span>${it.estado === "curso" ? `<span class="chip warn">A medias</span>` : ""}</div>`;
+}
+function checklistItem(it){
+  if (!it.checklist?.length) return "";
+  return `<div style="margin-top:8px">${it.checklist.map((c, i) => `<label class="check ${c.ok ? "done" : ""}"><input type="checkbox" data-act="k-check" data-id="${it.id}" data-i="${i}" ${c.ok ? "checked" : ""}><span class="txt">${esc(c.t)}</span></label>`).join("")}</div>`;
+}
+function itemKoppi(it){
+  const n = it.checklist?.length || 0, ok = (it.checklist || []).filter(c => c.ok).length;
+  return `<details class="kitem ${it.estado}" data-id="${it.id}" ${kAbiertos.has(it.id) ? "open" : ""}><summary>
+      <span class="kst" title="${ESTADOS_K[it.estado]}"></span><span class="grow">${esc(it.titulo)}</span>
+      <span class="chip">${it.tam}</span>${n ? `<span class="chip">${ok}/${n}</span>` : ""}</summary>
+    <div style="padding:6px 0 4px 22px">
+      <div class="row small" style="margin-bottom:6px">
+        <select data-act="k-estado" data-id="${it.id}">${Object.entries(ESTADOS_K).map(([v, x]) => `<option value="${v}" ${it.estado === v ? "selected" : ""}>${x}</option>`).join("")}</select>
+        <select data-act="k-tam" data-id="${it.id}">${Object.keys(TAMS).map(v => `<option ${it.tam === v ? "selected" : ""}>${v}</option>`).join("")}</select>
+        <select data-act="k-fase" data-id="${it.id}">${FASES.map(f => `<option value="${f.id}" ${+it.fase === f.id ? "selected" : ""}>Fase ${f.id}</option>`).join("")}</select>
+        <button type="button" class="btn" data-act="k-subir" data-id="${it.id}" title="Subir prioridad">↑</button>
+        <button type="button" class="x" data-act="k-borrar" data-id="${it.id}" title="Borrar">×</button>
+      </div>
+      <label class="small muted">Siguiente paso</label>
+      <textarea data-act="k-sig" data-id="${it.id}" style="min-height:44px" placeholder="Lo próximo concreto que hay que hacer">${esc(it.siguiente || "")}</textarea>
+      ${checklistItem(it)}
+    </div></details>`;
+}
+function vKoppi(){
+  const k = K(), bq = kBloque();
+  const activa = k.items.find(i => i.id === k.activa);
+  const { lista, caben } = kSugerencias(bq?.dur);
+  const sug = lista.length ? lista[kSalto % lista.length] : null;
+  const total = k.items.length, hechas = k.items.filter(i => i.estado === "hecho").length;
+  const pct = total ? Math.round(hechas / total * 100) : 0;
+  const bloqueTxt = !bq ? "No hay bloques de Koppi en el horario."
+    : bq.enCurso ? `Ahora: <b>${esc(bq.b.titulo)}</b> hasta las ${bq.b.fin} (quedan ${bq.quedan} min)`
+    : `Próximo bloque: <b>${fechaCorta(bq.d)} · ${bq.b.inicio}–${bq.b.fin}</b> (${bq.dur} min)`;
+
+  const foco = activa ? `
+    <div class="kfocus">
+      <div class="lbl">En marcha</div>
+      <h3>${esc(activa.titulo)}</h3>${chipsItem(activa)}
+      ${activa.plan ? `<p class="small" style="margin:6px 0">Al acabar tendré: <b>${esc(activa.plan)}</b></p>` : ""}
+      ${activa.siguiente ? `<p class="small muted" style="margin:6px 0">Punto de partida: ${esc(activa.siguiente)}</p>` : ""}
+      ${checklistItem(activa)}
+      <form data-form="k-cerrar" class="grid" style="gap:8px;margin-top:12px">
+        <label class="small muted">Antes de cerrar: ¿cuál es el siguiente paso concreto? Es lo primero que verás la próxima vez.</label>
+        <textarea name="siguiente" required placeholder="p. ej. «Conectar el botón Guardar con la API»"></textarea>
+        <label class="row small"><input type="checkbox" name="hecha"> La tarea está terminada</label>
+        <div class="row"><button class="btn primary">Cerrar sesión</button><button type="button" class="btn" data-act="k-cancelar">Cancelar</button></div>
+      </form>
+    </div>` : sug ? `
+    <div class="kfocus">
+      <div class="lbl">${caben ? "Toca ahora" : "Ninguna tarea cabe en este bloque: parte una en trozos más pequeños"}</div>
+      <h3>${esc(sug.titulo)}</h3>${chipsItem(sug)}
+      ${sug.siguiente ? `<p style="margin:8px 0"><span class="muted small">Donde lo dejaste:</span><br><b>${esc(sug.siguiente)}</b></p>`
+        : `<p class="small muted" style="margin:8px 0">Primera sesión con esta tarea: empieza por lo más pequeño que puedas terminar hoy.</p>`}
+      <form data-form="k-empezar" data-id="${sug.id}" class="grid" style="gap:8px;margin-top:10px">
+        <input type="text" name="plan" placeholder="Al acabar este bloque tendré…" required autocomplete="off">
+        <div class="row"><button class="btn primary">Empezar</button>
+          ${lista.length > 1 ? `<button type="button" class="btn" data-act="k-otra">Otra sugerencia (${kSalto % lista.length + 1}/${lista.length})</button>` : ""}</div>
+      </form>
+    </div>` : `
+    <div class="kfocus">
+      <div class="lbl">Primero: el inventario</div>
+      <ol class="small" style="padding-left:18px;margin:8px 0;line-height:1.7">
+        <li>Rellena <a href="02-Koppi/Inventario.md">Inventario.md</a> (20 min): qué páginas hay, en qué estado y qué falta.</li>
+        <li>O pásale a Claude la ruta del código de Koppi y lo hace él.</li>
+        <li>Con eso, Claude carga aquí las tareas ordenadas y troceadas.</li>
+      </ol>
+      <p class="small muted" style="margin:0">También puedes añadirlas a mano abajo.</p>
+    </div>`;
+
+  return `
+  <div class="grid g2">
+    <div class="card"><h2>¿Qué hago ahora?</h2>
+      <div class="small muted" style="margin-bottom:10px">${bloqueTxt}</div>${foco}</div>
+    <div class="card"><h2>Meta: Koppi v1</h2>
+      <input type="text" data-act="k-meta" data-f="objetivo" value="${esc(k.objetivo)}" placeholder="Qué es la v1 en una frase" style="width:100%">
+      <div class="row small" style="margin:8px 0"><span class="muted">Fecha objetivo</span>
+        <input type="date" data-act="k-meta" data-f="fecha" value="${esc(k.fecha)}">${k.fecha ? chipDias(entre(hoy(), parse(k.fecha))) : ""}</div>
+      <div class="spread small"><span>Progreso: ${hechas}/${total} tareas</span><b>${pct}%</b></div>
+      <div class="pbar" style="--c:var(--t-koppi)"><i style="width:${pct}%"></i></div>
+      <div class="small muted" style="margin-top:12px">La v1 está terminada cuando…</div>
+      ${k.criterios.map((c, i) => `<label class="check ${c.ok ? "done" : ""}"><input type="checkbox" data-act="k-crit" data-i="${i}" ${c.ok ? "checked" : ""}>
+        <span class="txt" style="flex:1">${esc(c.t)}</span><button type="button" class="x" data-act="k-borrarcrit" data-i="${i}">×</button></label>`).join("")}
+      <form data-form="k-criterio" class="row" style="margin-top:6px"><input type="text" name="t" placeholder="Añadir criterio (p. ej. «un usuario puede registrarse»)" style="flex:1" autocomplete="off"><button class="btn">+</button></form>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px"><h2>Añadir tarea al gameplan</h2>
+    <form data-form="k-item" class="capt">
+      <input type="text" name="titulo" placeholder="p. ej. «Página de perfil» o «Terminar el checkout»" required autocomplete="off">
+      <select name="fase">${FASES.map(f => `<option value="${f.id}">Fase ${f.id} · ${f.n}</option>`).join("")}</select>
+      <select name="tipo">${Object.entries(TIPOS_K).map(([v, n]) => `<option value="${v}">${n}</option>`).join("")}</select>
+      <select name="tam">${Object.entries(TAMS).map(([v, t]) => `<option value="${v}" ${v === "M" ? "selected" : ""}>${t.n}</option>`).join("")}</select>
+      <button class="btn primary">Añadir</button>
+    </form>
+    <p class="small muted" style="margin:8px 0 0"><b>S</b> cabe en un hueco entre clases · <b>M</b> en una noche · <b>L</b> solo en la noche larga del viernes. Si es más grande, pártela. Las páginas traen su checklist de «terminada».</p>
+  </div>
+
+  <div class="grid g3" style="margin-top:14px">
+    ${FASES.map(f => { const its = k.items.filter(i => +i.fase === f.id), h = its.filter(i => i.estado === "hecho").length;
+      return `<div class="card"><div class="spread"><h2>Fase ${f.id} · ${f.n}</h2><span class="chip">${h}/${its.length}</span></div>
+        <div class="small muted" style="margin:-4px 0 8px">${f.d}</div>
+        ${its.length ? its.map(itemKoppi).join("") : `<div class="empty small">Sin tareas.</div>`}</div>`; }).join("")}
+  </div>
+
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card"><h2>Últimas sesiones</h2>
+      ${k.sesiones.length ? k.sesiones.slice(-6).reverse().map(s => `<div class="date-item"><div class="grow">
+        <b>${esc(s.titulo)}</b>${s.hecha ? ` <span class="chip ok">terminada</span>` : ""}
+        <div class="small muted">${fechaCorta(new Date(s.fin))} · plan: ${esc(s.plan || "—")}</div>
+        <div class="small">→ siguiente: ${esc(s.siguiente)}</div></div></div>`).join("") : `<div class="empty small">Aún no hay sesiones.</div>`}
+    </div>
+    <div class="card"><h2>Reglas para no bloquearte</h2>
+      <ul class="small" style="padding-left:18px;margin:0;line-height:1.75">
+        <li>Nunca cierres una sesión sin escribir el <b>siguiente paso</b>.</li>
+        <li>Antes de empezar, una frase: «al acabar este bloque tendré…».</li>
+        <li>Fase 1 antes que fase 2: termina lo empezado antes de abrir páginas nuevas.</li>
+        <li>Una página está hecha cuando pasa su checklist, no cuando «se ve».</li>
+        <li>¿Atascado más de 20 min? Apunta la duda en el siguiente paso, cambia a una tarea S y vuelve otro día.</li>
+        <li>Ideas nuevas → <a href="02-Koppi/Ideas-aparcadas.md">Ideas aparcadas</a>, no al gameplan. Se deciden el domingo.</li>
+      </ul>
+    </div>
+  </div>`;
+}
+function submitKoppi(f){
+  const k = K(), fd = new FormData(f), form = f.dataset.form;
+  if (form === "k-item"){
+    const titulo = (fd.get("titulo") || "").trim(); if (!titulo) return;
+    const tipo = fd.get("tipo");
+    k.items.push({ id: kid(), titulo, fase: +fd.get("fase"), tipo, tam: fd.get("tam"), estado: "pendiente", siguiente: "",
+      checklist: tipo === "pagina" ? DOD_PAGINA.map(t => ({ t, ok: false })) : [] });
+  } else if (form === "k-criterio"){
+    const t = (fd.get("t") || "").trim(); if (!t) return; k.criterios.push({ t, ok: false });
+  } else if (form === "k-empezar"){
+    const it = k.items.find(i => i.id === f.dataset.id); if (!it) return;
+    it.estadoPrevio = it.estado; it.estado = "curso"; it.plan = (fd.get("plan") || "").trim(); it.inicioSesion = new Date().toISOString();
+    k.activa = it.id;
+  } else if (form === "k-cerrar"){
+    const it = k.items.find(i => i.id === k.activa); if (!it) return;
+    it.siguiente = (fd.get("siguiente") || "").trim();
+    const hecha = !!fd.get("hecha"); if (hecha) it.estado = "hecho";
+    k.sesiones.push({ id: kid(), titulo: it.titulo, plan: it.plan, siguiente: it.siguiente, hecha, inicio: it.inicioSesion, fin: new Date().toISOString() });
+    k.sesiones = k.sesiones.slice(-100);
+    it.plan = ""; k.activa = null; kSalto = 0;
+  }
+  save(); render();
+  const campo = document.querySelector(`[data-form="${form}"] input[type=text]`); if (campo && (form === "k-item" || form === "k-criterio")) campo.focus();
+}
+
+function opcionesCat(sel = ""){
+  return `<option value="" ${sel === "" ? "selected" : ""}>Asignatura…</option>
+    ${D.asignaturas.map(a => `<option value="${a.id}" ${sel === a.id ? "selected" : ""}>${esc(a.sigla && a.sigla !== a.nombre ? `${a.sigla} · ${a.nombre}` : a.nombre)}</option>`).join("")}
+    <option value="koppi" ${sel === "koppi" ? "selected" : ""}>Koppi</option>`;
+}
+function itemTarea(t){
+  const d = venceDate(t);
+  const vencida = !t.hecha && d && d < new Date();
+  const sigla = A[t.cat]?.sigla || asigNombre(t.cat);
+  return `<div class="task ${t.hecha ? "done" : ""}">
+    <input type="checkbox" data-act="tarea" data-id="${t.id}" ${t.hecha ? "checked" : ""}>
+    <div class="grow"><div class="tx">${esc(t.texto)}</div>
+      <div class="small muted row" style="gap:6px">${t.cat ? `<span class="dot" style="--c:${asigColor(t.cat)}"></span>${esc(sigla)}` : "General"}
+        ${t.fecha ? ` · <span style="${vencida ? "color:var(--danger)" : ""}">${fechaCorta(parse(t.fecha))}${t.hora ? ` ${t.hora}` : ""}${t.sesion ? ` (${t.sesion})` : ""}</span>` : ""}</div></div>
+    ${t.hecha ? "" : chipVence(t)}
+    <button class="x" data-act="borrar" data-id="${t.id}" title="Borrar">×</button></div>`;
+}
+let filtroCat = "todas";
+function vTareas(){
+  const ahora = new Date(), manana = addDias(hoy(), 2), sem = addDias(hoy(), 8);
+  const vis = S.tareas.filter(t => filtroCat === "todas" || (t.cat || "") === filtroCat);
+  const pend = vis.filter(t => !t.hecha).sort(ordenTareas);
+  const conF = pend.filter(t => t.fecha);
+  const grupos = [
+    ["Vencidas", conF.filter(t => venceDate(t) < ahora)],
+    ["Hoy y mañana", conF.filter(t => venceDate(t) >= ahora && venceDate(t) < manana)],
+    ["Esta semana", conF.filter(t => venceDate(t) >= manana && venceDate(t) < sem)],
+    ["Más adelante", conF.filter(t => venceDate(t) >= sem)],
+    ["Bandeja (sin fecha)", pend.filter(t => !t.fecha)],
+  ].filter(([n, ts]) => ts.length || n === "Hoy y mañana");
+  const hechas = vis.filter(t => t.hecha);
+  return `
+  <div class="card" style="margin-bottom:14px">
+    <h2>Apuntar tarea</h2>
+    ${formCaptura()}
+    <div class="row small" style="margin-top:10px"><span class="muted">Filtrar:</span>
+      <select data-act="filtro"><option value="todas" ${filtroCat === "todas" ? "selected" : ""}>Todas</option>${opcionesCat(filtroCat).replace("Asignatura…", "Sin asignatura")}</select></div>
+  </div>
+  <div class="grid g2">
+    ${grupos.map(([n, ts]) => `<div class="card"><h2>${n} · ${ts.length}</h2>${ts.length ? ts.map(itemTarea).join("") : `<div class="empty">Nada.</div>`}</div>`).join("")}
+  </div>
+  ${hechas.length ? `<details class="card" style="margin-top:14px"><summary>Hechas (${hechas.length})</summary>${hechas.map(itemTarea).join("")}
+    <button class="btn small" data-act="limpiar" style="margin-top:10px">Borrar hechas</button></details>` : ""}`;
+}
+
+function vRevision(){
+  const h = hoy(), prox = addDias(lunesDe(h), diaSem(h) === 7 ? 7 : 0);
+  const k = semanaISO(prox);
+  const r = S.revision[k] ||= { checks: [], prioridades: "", koppi: "", ajustes: "" };
+  const hechos = D.revisionSemanal.filter((_, i) => r.checks[i]).length;
+  const anteriores = Object.keys(S.revision).filter(x => x !== k && (S.revision[x].prioridades || S.revision[x].koppi || S.revision[x].ajustes)).sort().reverse();
+  return `
+  <div class="grid g2">
+    <div class="card">
+      <div class="spread"><h2>Checklist · semana del ${fechaCorta(prox)}</h2><span class="chip ${hechos === D.revisionSemanal.length ? "ok" : ""}">${hechos}/${D.revisionSemanal.length}</span></div>
+      ${D.revisionSemanal.map((t, i) => `<label class="check ${r.checks[i] ? "done" : ""}"><input type="checkbox" data-act="rev" data-k="${k}" data-i="${i}" ${r.checks[i] ? "checked" : ""}><span class="txt">${esc(t)}</span></label>`).join("")}
+      <div class="row" style="margin-top:12px"><span class="muted small">Modo de la semana:</span>
+        <div class="seg">${Object.entries(MODOS).map(([m, x]) => `<button data-act="modo" data-m="${m}" aria-pressed="${S.modo === m}">${x.n}</button>`).join("")}</div></div>
+    </div>
+    <div class="card">
+      <h2>Plan de la semana</h2>
+      <label class="small muted">3 prioridades (una por línea)</label>
+      <textarea data-act="revtxt" data-k="${k}" data-f="prioridades" placeholder="1. \n2. \n3. ">${esc(r.prioridades)}</textarea>
+      <label class="small muted">Objetivo de Koppi: un entregable concreto</label>
+      <textarea data-act="revtxt" data-k="${k}" data-f="koppi" style="min-height:50px" placeholder="p. ej. «Pantalla de onboarding terminada y probada con 3 usuarios»">${esc(r.koppi)}</textarea>
+      <label class="small muted">¿Qué falló la semana pasada y qué ajusto?</label>
+      <textarea data-act="revtxt" data-k="${k}" data-f="ajustes" style="min-height:50px">${esc(r.ajustes)}</textarea>
+    </div>
+    <div class="card">
+      <h2>Sincronización y copia</h2>
+      ${(() => { const si = window.syncInfo || {};
+        if (si.modo === "firebase" && si.email) return `<p class="small" style="margin-top:0">Sincronizado con <b>${esc(si.email)}</b>. Funciona sin conexión: los cambios se suben solos al volver la red.</p>
+          <div class="row" style="margin-bottom:10px"><button class="btn" data-act="sync-salir">Cerrar sesión</button></div>`;
+        if (si.modo === "firebase") return `<p class="small" style="margin-top:0">Sin sincronizar: los datos se quedan en este dispositivo.</p>
+          <div class="row" style="margin-bottom:10px"><button class="btn primary" data-act="sync-entrar">Iniciar sesión</button></div>`;
+        return `<p class="small muted" style="margin-top:0">Los datos se guardan en este dispositivo (sincronización aún no configurada).</p>`; })()}
+      <p class="small muted">Copia de seguridad manual:</p>
+      <div class="row"><button class="btn" data-act="exportar">Exportar JSON</button>
+        <label class="btn">Importar JSON<input type="file" accept="application/json" data-act="importar" hidden></label></div>
+    </div>
+    ${anteriores.length ? `<div class="card"><h2>Semanas anteriores</h2>${anteriores.slice(0, 8).map(x => { const v = S.revision[x];
+      return `<details style="padding:6px 0;border-bottom:1px solid var(--line)"><summary>${x}</summary>
+        <div class="small" style="white-space:pre-wrap;margin-top:6px">${v.prioridades ? `<b>Prioridades</b>\n${esc(v.prioridades)}\n` : ""}${v.koppi ? `<b>Koppi</b>\n${esc(v.koppi)}\n` : ""}${v.ajustes ? `<b>Ajustes</b>\n${esc(v.ajustes)}` : ""}</div></details>`; }).join("")}</div>` : ""}
+  </div>`;
+}
+
+// ---------- eventos ----------
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  const act = el.dataset.act;
+  if (act === "vista"){ e.preventDefault(); vista = el.dataset.v; history.replaceState(null, "", "#" + vista); render(); window.scrollTo(0, 0); }
+  else if (act === "modo"){ S.modo = el.dataset.m; save(); render(); }
+  else if (act === "tema"){
+    const arr = S.temas[el.dataset.id] ||= []; const i = +el.dataset.i;
+    arr[i] = ((arr[i] || 0) + 1) % 4; tocar(el.dataset.id); save(); render();
+  }
+  else if (act === "borrar"){ S.tareas = S.tareas.filter(t => t.id !== el.dataset.id); save(); render(); }
+  else if (act === "limpiar"){ S.tareas = S.tareas.filter(t => !t.hecha); save(); render(); }
+  else if (act === "sync-salir"){ if (confirm("¿Cerrar sesión en este dispositivo?")) window.syncInfo?.cerrarSesion?.(); }
+  else if (act === "sync-entrar"){ window.syncInfo?.iniciarSesion?.(); }
+  else if (act === "k-otra"){ kSalto++; render(); }
+  else if (act === "k-cancelar"){
+    const k = K(), it = k.items.find(i => i.id === k.activa);
+    if (it){ it.estado = it.estadoPrevio || it.estado; it.plan = ""; } k.activa = null; save(); render();
+  }
+  else if (act === "k-borrar"){
+    if (!confirm("¿Borrar esta tarea del gameplan?")) return;
+    const k = K(); k.items = k.items.filter(i => i.id !== el.dataset.id); if (k.activa === el.dataset.id) k.activa = null; save(); render();
+  }
+  else if (act === "k-borrarcrit"){ e.preventDefault(); K().criterios.splice(+el.dataset.i, 1); save(); render(); }
+  else if (act === "k-subir"){
+    const its = K().items, i = its.findIndex(x => x.id === el.dataset.id);
+    let j = i - 1; while (j >= 0 && +its[j].fase !== +its[i].fase) j--;
+    if (j >= 0){ const [x] = its.splice(i, 1); its.splice(j, 0, x); save(); render(); }
+  }
+  else if (act === "exportar"){
+    const blob = new Blob([JSON.stringify(S, null, 2)], { type: "application/json" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `comodin-${ymd(hoy())}.json`; a.click();
+  }
+});
+document.addEventListener("change", e => {
+  const el = e.target, act = el.dataset.act;
+  if (act === "repaso"){
+    const m = S.repaso[el.dataset.f] ||= {}; m[el.dataset.id] = el.checked;
+    if (el.checked) tocar(el.dataset.id); save(); render();
+  }
+  else if (act === "habito"){ const m = S.habitos[ymd(hoy())] ||= {}; m[el.dataset.id] = el.checked; save(); render(); }
+  else if (act === "tarea"){ const t = S.tareas.find(t => t.id === el.dataset.id); if (t){ t.hecha = el.checked; save(); render(); } }
+  else if (act === "rev"){ const r = S.revision[el.dataset.k]; r.checks[+el.dataset.i] = el.checked; save(); render(); }
+  else if (act === "filtro"){ filtroCat = el.value; render(); }
+  else if (act === "k-crit"){ K().criterios[+el.dataset.i].ok = el.checked; save(); render(); }
+  else if (act === "k-check"){ const it = K().items.find(i => i.id === el.dataset.id); if (it){ it.checklist[+el.dataset.i].ok = el.checked; save(); render(); } }
+  else if (act === "k-estado" || act === "k-tam" || act === "k-fase"){
+    const k = K(), it = k.items.find(i => i.id === el.dataset.id); if (!it) return;
+    if (act === "k-estado"){ it.estado = el.value; if (el.value !== "curso" && k.activa === it.id) k.activa = null; }
+    if (act === "k-tam") it.tam = el.value;
+    if (act === "k-fase") it.fase = +el.value;
+    save(); render();
+  }
+  else if (act === "capt"){
+    // actualiza la previsualización del vencimiento sin redibujar (no se pierde lo escrito)
+    const f = el.form; capt.cat = f.cat.value; capt.vence = f.vence.value;
+    f.fecha.hidden = f.hora.hidden = capt.vence !== "fecha";
+    const p = f.querySelector(".prev"); p.innerHTML = textoPrevia(f.fecha.value, f.hora.value); p.style.color = "";
+  }
+  else if (act === "importar" && el.files[0]){
+    el.files[0].text().then(txt => { try { S = Object.assign(structuredClone(DEF), JSON.parse(txt)); save(); render(); alert("Datos importados."); } catch(err){ alert("El archivo no es válido."); } });
+  }
+});
+document.addEventListener("input", e => {
+  const el = e.target, act = el.dataset.act;
+  if (act === "revtxt"){ S.revision[el.dataset.k][el.dataset.f] = el.value; save(); }
+  else if (act === "k-sig"){ const it = K().items.find(i => i.id === el.dataset.id); if (it){ it.siguiente = el.value; save(); } }
+  else if (act === "k-meta"){ K()[el.dataset.f] = el.value; save(); }
+});
+document.addEventListener("toggle", e => {
+  const d = e.target; if (!d.classList?.contains("kitem")) return;
+  d.open ? kAbiertos.add(d.dataset.id) : kAbiertos.delete(d.dataset.id);
+}, true);
+document.addEventListener("submit", e => {
+  const f = e.target; e.preventDefault();
+  if (f.dataset.form?.startsWith("k-")) return submitKoppi(f);
+  const fd = new FormData(f), texto = (fd.get("texto") || "").trim(); if (!texto) return;
+  const cat = fd.get("cat") || "", vence = fd.get("vence") || "nada";
+  const r = calcularVence(cat, vence, fd.get("fecha"), fd.get("hora"));
+  const p = f.querySelector(".prev");
+  if (!r || (vence === "fecha" && !r.fecha)){
+    p.innerHTML = vence === "fecha" ? "Falta la fecha límite." : "Elige la asignatura (o cambia a «elegir fecha» / «sin fecha»).";
+    p.style.color = "var(--danger)"; return;
+  }
+  const t = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), texto, cat, hecha: false,
+              fecha: r.fecha, hora: r.hora, sesion: r.sesion || "", creada: new Date().toISOString() };
+  S.tareas.push(t); save(); render();
+  const nuevo = document.querySelector(`[data-form="${f.dataset.form}"] input[name=texto]`); if (nuevo) nuevo.focus();
+});
+window.addEventListener("hashchange", () => { const v = location.hash.slice(1); if (v in VISTAS && v !== vista){ vista = v; render(); } });
+// refresca "ahora" cada minuto en Hoy y Semana, sin pisar lo que se está escribiendo
+setInterval(() => { if ((vista === "hoy" || vista === "semana") && !escribiendo()) render(); }, 60000);
+
+// ---------- app instalable y sin conexión ----------
+function toast(html, boton, alPulsar){
+  document.querySelector(".toast")?.remove();
+  const t = document.createElement("div"); t.className = "toast";
+  t.innerHTML = `<span>${html}</span>${boton ? `<button>${boton}</button>` : ""}<button aria-label="Cerrar">×</button>`;
+  const [b1, b2] = t.querySelectorAll("button");
+  if (boton){ b1.onclick = alPulsar; b2.onclick = () => t.remove(); } else b1.onclick = () => t.remove();
+  document.body.append(t);
+}
+if ("serviceWorker" in navigator && location.protocol !== "file:"){
+  navigator.serviceWorker.register("sw.js").catch(e => console.warn("SW", e));
+  navigator.serviceWorker.addEventListener("message", e => {
+    if (e.data?.tipo === "actualizado") toast("Hay una versión nueva del Comodín.", "Actualizar", () => location.reload());
+  });
+}
+// Consejo para instalar en iPhone (una sola vez)
+try {
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent), instalada = navigator.standalone || matchMedia("(display-mode: standalone)").matches;
+  if (ios && !instalada && !localStorage.getItem("comodin.avisoInstalar")){
+    localStorage.setItem("comodin.avisoInstalar", "1");
+    setTimeout(() => toast("Instálala: botón <b>Compartir</b> → <b>Añadir a pantalla de inicio</b>."), 1500);
+  }
+} catch(e){}
+window.addEventListener("syncinfo", () => { if (vista === "revision") programarRender(); });
+
+render();
+</script>
+<script type="module" src="sync.js"></script>
+</body>
+</html>
