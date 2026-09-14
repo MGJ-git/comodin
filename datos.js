@@ -212,9 +212,10 @@ window.DATOS = {
   ],
 
   // ---------- EVENTOS PUNTUALES (citas, reuniones) ----------
-  // Aparecen en Hoy y en Semana ese día y recortan el bloque con el que coincidan (las clases no).
+  // Los eventos se crean desde la app (botón «+ Evento» o pulsando en el calendario).
+  // Los de aquí se copian UNA vez a tus eventos (por id) y luego se editan/borran desde la app.
   eventos: [
-    { fecha: "2026-09-17", inicio: "17:30", fin: "18:30", titulo: "Café patentes" },
+    { id: "cafe-patentes-20260917", fecha: "2026-09-17", inicio: "17:30", fin: "18:30", titulo: "Café patentes" },
   ],
 
   // ---------- FECHAS CLAVE (exámenes, hitos) ----------

@@ -7,12 +7,13 @@
 //   users/{uid}/estado/general   modo, temas, tocado, repaso, habitos, revision
 //   users/{uid}/estado/koppi     objetivo, fecha, criterios, activa
 //   users/{uid}/tareas/{id}
+//   users/{uid}/eventos/{id}
 //   users/{uid}/koppiItems/{id}  (con campo orden)
 //   users/{uid}/koppiSesiones/{id}
 import { firebaseConfig } from "./firebase-config.js";
 
 const VERSION_SDK = "10.12.2";
-const MAPAS = ["temas", "tocado", "repaso", "habitos", "revision"];
+const MAPAS = ["temas", "tocado", "repaso", "habitos", "revision", "eventosSembrados"];
 const $ = id => document.getElementById(id);
 
 // ---------- indicador de estado ----------
@@ -88,6 +89,7 @@ function conectar(uid, db, F, subs){
       general: { modo: S.modo || "normal", ...Object.fromEntries(MAPAS.map(m => [m, S[m] || {}])) },
       koppiMeta: { objetivo: k.objetivo || "", fecha: k.fecha || "", criterios: k.criterios || [], activa: k.activa ?? null },
       tareas: S.tareas || [],
+      eventos: S.eventos || [],
       koppiItems: (k.items || []).map((it, i) => ({ ...it, orden: i })),
       koppiSesiones: (k.sesiones || []).map(s => ({ ...s, id: s.id || "s" + String(s.fin || "").replace(/\W/g, "") })),
     });
@@ -101,7 +103,7 @@ function conectar(uid, db, F, subs){
   // Sube solo lo que ha cambiado respecto a `foto`
   function subir(S){
     const act = partes(S);
-    const prev = foto || { general: {}, koppiMeta: null, tareas: [], koppiItems: [], koppiSesiones: [] };
+    const prev = foto || { general: {}, koppiMeta: null, tareas: [], eventos: [], koppiItems: [], koppiSesiones: [] };
 
     const g = {}; let hay = false;
     if (act.general.modo !== prev.general.modo){ g.modo = act.general.modo; hay = true; }
@@ -116,7 +118,7 @@ function conectar(uid, db, F, subs){
     if (hay) escribir(F.setDoc(ref("estado/general"), g, { merge: true }));
     if (!igual(act.koppiMeta, prev.koppiMeta)) escribir(F.setDoc(ref("estado/koppi"), act.koppiMeta));
 
-    for (const nombre of ["tareas", "koppiItems", "koppiSesiones"]){
+    for (const nombre of ["tareas", "eventos", "koppiItems", "koppiSesiones"]){
       const antes = new Map(prev[nombre].map(x => [x.id, x]));
       const ahora = new Map(act[nombre].map(x => [x.id, x]));
       for (const [id, x] of ahora) if (!igual(antes.get(id), x)) escribir(F.setDoc(F.doc(col(nombre), id), x));
@@ -142,6 +144,7 @@ function conectar(uid, db, F, subs){
     window.alGuardar = subir;
     const k = S => (S.koppi ||= {});
     subs.push(F.onSnapshot(col("tareas"), q => aplicar(S => { S.tareas = q.docs.map(d => d.data()); })));
+    subs.push(F.onSnapshot(col("eventos"), q => aplicar(S => { S.eventos = q.docs.map(d => d.data()); })));
     subs.push(F.onSnapshot(col("koppiItems"), q => aplicar(S => {
       k(S).items = q.docs.map(d => d.data()).sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
     })));
