@@ -1,17 +1,17 @@
 // Service worker: la app funciona sin conexión.
-// - Archivos de la app: se sirven desde la caché al instante y se actualizan en segundo plano.
-//   Si algo cambió (p. ej. datos.js), se avisa a la página para que ofrezca recargar.
+// - Archivos de la app: primero se intenta la red (máx. 3 s) para tener siempre la última versión;
+//   si no hay conexión o tarda, se sirve la copia guardada.
 // - SDK de Firebase (gstatic): se guarda la primera vez y luego sale de la caché.
 // - Firestore/Auth: no se tocan; el propio SDK gestiona el modo sin conexión.
-const CACHE = "comodin-v1";
+const CACHE = "comodin-v2";
 const APP = [
   "./", "index.html", "datos.js", "sync.js", "firebase-config.js", "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png",
 ];
-const VIGILAR = /\/(index\.html|datos\.js|sync\.js|firebase-config\.js)?$/;
+const ESPERA_RED = 3000;
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(APP)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(APP.map(u => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", e => {
@@ -19,10 +19,6 @@ self.addEventListener("activate", e => {
     .then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
-
-async function avisar(){
-  for (const c of await self.clients.matchAll()) c.postMessage({ tipo: "actualizado" });
-}
 
 self.addEventListener("fetch", e => {
   const req = e.request;
@@ -43,17 +39,18 @@ self.addEventListener("fetch", e => {
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
     const clave = req.mode === "navigate" ? "index.html" : new Request(url.origin + url.pathname);
-    const enCache = await cache.match(clave);
     const red = fetch(req, { cache: "no-cache" }).then(async res => {
-      if (!res.ok) return enCache || res;
-      if (enCache && VIGILAR.test(url.pathname)){
-        const [antes, ahora] = await Promise.all([enCache.clone().text(), res.clone().text()]);
-        if (antes !== ahora) avisar();
-      }
-      await cache.put(clave, res.clone());
+      if (res.ok) await cache.put(clave, res.clone());
       return res;
-    }).catch(() => enCache || Response.error());
-    if (enCache){ e.waitUntil(red); return enCache; }
-    return red;
+    });
+    e.waitUntil(red.catch(() => {}));
+    const enCache = cache.match(clave);
+    // La red gana si responde en menos de ESPERA_RED; si no, la copia guardada (y la red sigue actualizando la caché)
+    const tiempo = new Promise(res => setTimeout(res, ESPERA_RED));
+    try {
+      const r = await Promise.race([red, tiempo.then(() => null)]);
+      if (r && r.ok) return r;
+    } catch {}
+    return (await enCache) || red.catch(() => Response.error());
   })());
 });
