@@ -1268,12 +1268,23 @@ if ("serviceWorker" in navigator && location.protocol !== "file:"){
     if (e.data?.tipo === "actualizado") toast("Hay una versión nueva del Comodín.", "Actualizar", () => location.reload());
   });
 }
-// Consejo para instalar en iPhone (una sola vez)
+// Instrucciones para instalar en iPhone: se muestran mientras no esté instalada (se pueden ocultar en esta visita)
 try {
-  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent), instalada = navigator.standalone || matchMedia("(display-mode: standalone)").matches;
-  if (ios && !instalada && !localStorage.getItem("comodin.avisoInstalar")){
-    localStorage.setItem("comodin.avisoInstalar", "1");
-    setTimeout(() => toast("Instálala: botón <b>Compartir</b> → <b>Añadir a pantalla de inicio</b>."), 1500);
+  const ua = navigator.userAgent;
+  const ios = /iphone|ipad|ipod/i.test(ua), instalada = navigator.standalone || matchMedia("(display-mode: standalone)").matches;
+  const otroNavegador = /CriOS|FxiOS|EdgiOS|OPiOS|GSA\//.test(ua);
+  if (ios && !instalada && !sessionStorage.getItem("comodin.ocultarInstalar")){
+    const aviso = document.createElement("div");
+    aviso.className = "banner"; aviso.style.cssText = "margin-bottom:14px;line-height:1.55";
+    aviso.innerHTML = `<div class="spread"><b>📲 Instálala en tu iPhone</b><button class="x" aria-label="Ocultar">×</button></div>
+      <ol style="margin:6px 0 0;padding-left:20px">
+        ${otroNavegador ? `<li>Estás en otro navegador: abre esta dirección en <b>Safari</b>.</li>` : ""}
+        <li>¿La has abierto desde otra app (Claude, WhatsApp, correo…)? Esa ventana no deja instalar: ábrela en la app <b>Safari</b> escribiendo <b>mgj-git.github.io/comodin</b>.</li>
+        <li>En Safari toca <b>···</b> (abajo a la derecha) o el botón <b>Compartir</b> <span style="white-space:nowrap">(cuadrado con flecha ↑)</span>.</li>
+        <li>Desliza hacia abajo la lista y toca <b>Añadir a pantalla de inicio</b>. Si aparece, deja activado <b>Abrir como app web</b>.</li>
+      </ol>`;
+    aviso.querySelector(".x").onclick = () => { sessionStorage.setItem("comodin.ocultarInstalar", "1"); aviso.remove(); };
+    document.getElementById("banner").before(aviso);
   }
 } catch(e){}
 window.addEventListener("syncinfo", () => { if (vista === "revision") programarRender(); });
