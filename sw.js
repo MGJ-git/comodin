@@ -3,7 +3,8 @@
 //   si no hay conexión o tarda, se sirve la copia guardada.
 // - SDK de Firebase (gstatic): se guarda la primera vez y luego sale de la caché.
 // - Firestore/Auth: no se tocan; el propio SDK gestiona el modo sin conexión.
-const CACHE = "comodin-v2";
+const CACHE = "comodin-v3";
+const RAIZ = new URL("./", self.location).pathname;   // p. ej. /comodin/
 const APP = [
   "./", "index.html", "datos.js", "sync.js", "firebase-config.js", "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png",
@@ -38,7 +39,9 @@ self.addEventListener("fetch", e => {
 
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const clave = req.mode === "navigate" ? "index.html" : new Request(url.origin + url.pathname);
+    // Solo la raíz de la app se guarda como index.html; cualquier otra página (p. ej. /widget/) con su propia ruta
+    const esApp = url.pathname === RAIZ || url.pathname === RAIZ + "index.html";
+    const clave = esApp ? "index.html" : new Request(url.origin + url.pathname);
     const red = fetch(req, { cache: "no-cache" }).then(async res => {
       if (res.ok) await cache.put(clave, res.clone());
       return res;

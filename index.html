@@ -442,7 +442,8 @@ function render(){
         <ul style="margin:6px 0 0;padding-left:20px">${D.pendientes.map(p => `<li>${esc(p)}</li>`).join("")}</ul></details>` : "";
   document.getElementById("app").innerHTML = ({ hoy: vHoy, semana: vSemana, koppi: vKoppi, asignaturas: vAsignaturas, fechas: vFechas, tareas: vTareas, revision: vRevision })[vista]();
   document.getElementById("foot").innerHTML = `
-    <span>Método, notas de asignaturas, inventario de Koppi y gym: carpeta <b>timetable</b> de tu ordenador.</span>`;
+    <a href="widget/">📱 Widget para la pantalla de inicio</a>
+    <span>· Método, notas de asignaturas, inventario de Koppi y gym: carpeta <b>timetable</b> de tu ordenador.</span>`;
 }
 
 function vHoy(){

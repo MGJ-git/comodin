@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Widget · Comodín</title>
+<meta name="theme-color" content="#141413">
+<link rel="icon" type="image/png" href="../icons/icon-192.png">
+<style>
+:root{--bg:#141413;--surface:#1e1d1b;--surface2:#292825;--text:#ecebe7;--muted:#a09c94;--line:#34322e;--acc:#fb923c;--ok:#4ccf85}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+body{font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;padding:max(20px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left))}
+main{max-width:560px;margin:0 auto}
+h1{font-size:24px;margin:0 0 4px}
+.muted{color:var(--muted)}
+a{color:var(--acc)}
+ol{padding-left:22px}
+li{margin:10px 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+pre{background:var(--surface2);border-radius:10px;padding:12px;overflow-x:auto;font-size:12px;line-height:1.45;white-space:pre-wrap;word-break:break-word;margin:10px 0 0}
+.btn{display:inline-block;border:0;border-radius:10px;padding:11px 16px;font:inherit;font-weight:600;background:var(--text);color:var(--bg);cursor:pointer;text-decoration:none}
+.btn.sec{background:var(--surface2);color:var(--text)}
+.ok{color:var(--ok);font-weight:600}
+.tam{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tam div{background:var(--surface2);border-radius:10px;padding:10px;font-size:14px}
+</style>
+</head>
+<body>
+<main>
+  <p><a href="../">← Volver al Comodín</a></p>
+  <h1>📱 Widget del Comodín</h1>
+  <p class="muted">Tu horario en la pantalla de inicio o de bloqueo: qué toca ahora, qué viene después y el resto del día. Funciona sin conexión y al tocarlo abre la app.</p>
+
+  <div class="card">
+    <ol>
+      <li><b>Instala Scriptable</b> (gratis) desde la App Store.<br>
+        <a class="btn sec" href="https://apps.apple.com/app/scriptable/id1405459188" style="margin-top:8px">Abrir en la App Store</a></li>
+      <li><b>Copia el código</b>:<br>
+        <button class="btn" id="copiar" style="margin-top:8px">Copiar código</button> <span id="copiado" class="ok" hidden>¡Copiado!</span>
+        <pre id="codigo"></pre></li>
+      <li>Abre <b>Scriptable</b> → toca <b>+</b> (arriba a la derecha) → <b>pega</b> el código → toca el título de arriba y llámalo <b>Comodín</b> → <b>Hecho</b>. Si tocas ▶ verás una vista previa.</li>
+      <li>En la pantalla de inicio, <b>mantén pulsado</b> un hueco → <b>Editar</b> → <b>Añadir widget</b> → busca <b>Scriptable</b> → elige el tamaño → <b>Añadir widget</b>.</li>
+      <li><b>Mantén pulsado el widget</b> → <b>Editar widget</b> → en <b>Script</b> elige <b>Comodín</b>.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <b>Tamaños</b>
+    <div class="tam" style="margin-top:10px">
+      <div><b>Pequeño</b><br><span class="muted">Ahora y siguiente</span></div>
+      <div><b>Mediano</b><br><span class="muted">Ahora, siguiente y lo que viene</span></div>
+      <div><b>Grande</b><br><span class="muted">Todo el día, hora de dormir y primera clase de mañana</span></div>
+      <div><b>Pantalla de bloqueo</b><br><span class="muted">Ahora · siguiente · 🌙</span></div>
+    </div>
+    <p class="muted" style="font-size:14px;margin-bottom:0">Opcional: en <b>Editar widget → Parameter</b> escribe <code>entregas</code> o <code>examenes</code> para ver ese modo de semana.</p>
+  </div>
+
+  <div class="card muted" style="font-size:14px">
+    El widget se actualiza solo: el código que pegas es un cargador corto que descarga la última versión del widget cada vez, y guarda una copia por si no hay conexión.
+    Muestra el horario (clases, prácticas, bloques y eventos fijos). Las tareas y los eventos que crees en la app aparecerán cuando activemos la sincronización.
+  </div>
+</main>
+<script>
+const CODIGO = `// Comodín · widget (cargador). Descarga la última versión y guarda copia para usarlo sin conexión.
+const URL_WIDGET = "https://mgj-git.github.io/comodin/widget/comodin-widget.js";
+const fmC = FileManager.local();
+const copia = fmC.joinPath(fmC.documentsDirectory(), "comodin-widget-codigo.js");
+let codigo = null;
+try {
+  const r = new Request(URL_WIDGET + "?t=" + Date.now());
+  r.timeoutInterval = 8;
+  codigo = await r.loadString();
+  if (!codigo.includes("Comodín")) throw new Error("respuesta inesperada");
+  fmC.writeString(copia, codigo);
+} catch (e) {
+  codigo = fmC.fileExists(copia) ? fmC.readString(copia) : null;
+}
+if (!codigo) {
+  const w = new ListWidget();
+  w.addText("Comodín: abre este widget una vez con conexión.");
+  Script.setWidget(w); Script.complete();
+} else {
+  await eval("(async () => {\\n" + codigo + "\\n})()");
+}`;
+document.getElementById("codigo").textContent = CODIGO;
+document.getElementById("copiar").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(CODIGO); }
+  catch (e) {
+    const r = document.createRange(); r.selectNodeContents(document.getElementById("codigo"));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand("copy");
+  }
+  const ok = document.getElementById("copiado"); ok.hidden = false; setTimeout(() => ok.hidden = true, 2500);
+});
+</script>
+</body>
+</html>
