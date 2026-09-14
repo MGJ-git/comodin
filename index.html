@@ -1272,14 +1272,25 @@ if ("serviceWorker" in navigator && location.protocol !== "file:"){
 // Instalar en iPhone: botón fijo «📲 Instalar» + aviso al entrar, mientras no esté instalada.
 // La × del aviso solo lo oculta ahora; el botón de arriba sigue ahí para volver a ver los pasos.
 function pasosInstalar(){
-  const otroNavegador = /CriOS|FxiOS|EdgiOS|OPiOS|GSA\//.test(navigator.userAgent);
+  const ua = navigator.userAgent;
+  const ddg = /DuckDuckGo|Ddg\//i.test(ua);
+  const otro = !ddg && /CriOS|FxiOS|EdgiOS|OPiOS|GSA\/|Brave/i.test(ua);
+  const sw = "serviceWorker" in navigator, offline = !!navigator.serviceWorker?.controller;
+  const estado = `<div class="small" style="margin-top:8px">Modo sin conexión en este navegador:
+    ${offline ? `<b style="color:var(--ok)">activo ✓</b>`
+      : sw ? `<b style="color:var(--warn)">se activa al recargar la página</b>`
+      : `<b style="color:var(--warn)">no disponible</b> (la app funciona, pero necesita conexión)`}</div>`;
+  if (ddg) return `<ol style="margin:6px 0 0;padding-left:20px;line-height:1.6">
+      <li><b>Protege la web del fuego 🔥</b> (lo más importante): menú <b>···</b> → <b>Proteger sitio contra el fuego</b> (<i>Fireproof</i>). Si no, el botón del fuego borra tus tareas.</li>
+      <li>Para tenerla como app: menú <b>···</b> → <b>Compartir</b> → desliza la lista hacia abajo → <b>Añadir a pantalla de inicio</b>.</li>
+      <li>Si esa opción no aparece: menú <b>···</b> → <b>Añadir a favoritos</b>, y la tienes a un toque al abrir DuckDuckGo.</li>
+    </ol>${estado}`;
   return `<ol style="margin:6px 0 0;padding-left:20px;line-height:1.6">
-    ${otroNavegador ? `<li>Estás en otro navegador: abre esta dirección en <b>Safari</b>.</li>` : ""}
-    <li>Tiene que ser la app <b>Safari</b>. Si la abriste desde otra app (Claude, WhatsApp, correo…), esa ventana no deja instalar: abre Safari y escribe <b>mgj-git.github.io/comodin</b>.</li>
-    <li>Toca <b>···</b> (abajo a la derecha) o el botón <b>Compartir</b> <span style="white-space:nowrap">(cuadrado con flecha ↑)</span>.</li>
-    <li>Desliza la lista hacia abajo y toca <b>Añadir a pantalla de inicio</b>. Si aparece, deja activado <b>Abrir como app web</b> y pulsa <b>Añadir</b>.</li>
+    <li>Si la abriste desde otra app (Claude, WhatsApp, correo…), ábrela en tu navegador escribiendo <b>mgj-git.github.io/comodin</b>.</li>
+    <li>Toca <b>···</b> o el botón <b>Compartir</b> <span style="white-space:nowrap">(cuadrado con flecha ↑)</span>.</li>
+    <li>Desliza la lista hacia abajo y toca <b>Añadir a pantalla de inicio</b>${otro ? "" : `. Si aparece, deja activado <b>Abrir como app web</b>`} y pulsa <b>Añadir</b>.</li>
     <li>Abre la app desde el icono nuevo, con conexión la primera vez.</li>
-  </ol>`;
+  </ol>${estado}`;
 }
 function abrirAyudaInstalar(){
   let m = document.getElementById("modal");
@@ -1299,7 +1310,7 @@ try {
     document.querySelector(".brand").append(btn);
     const aviso = document.createElement("div");
     aviso.className = "banner"; aviso.style.marginBottom = "14px";
-    aviso.innerHTML = `<div class="spread"><b>📲 Instálala en tu iPhone</b><button class="x" aria-label="Ocultar por ahora">×</button></div>${pasosInstalar()}
+    aviso.innerHTML = `<div class="spread"><b>📲 Tenla a mano en tu iPhone</b><button class="x" aria-label="Ocultar por ahora">×</button></div>${pasosInstalar()}
       <div class="small muted" style="margin-top:6px">Si lo ocultas, puedes volver a verlo con el botón «📲 Instalar» de arriba.</div>`;
     aviso.querySelector(".x").onclick = () => aviso.remove();
     document.getElementById("banner").before(aviso);
