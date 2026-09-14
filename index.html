@@ -31,7 +31,9 @@
 [hidden]{display:none!important}
 .capt{display:flex;flex-wrap:wrap;gap:8px}
 .capt input[type=text]{flex:1 1 100%}
-.capt select{flex:1 1 170px}
+.capt select{flex:1 1 150px;min-width:0}
+select{max-width:100%;text-overflow:ellipsis}
+.grid > *, .row > *{min-width:0}
 .capt input[type=date],.capt input[type=time]{flex:1 1 120px}
 .capt .btn{flex:0 0 auto}
 html,body{margin:0;background:var(--bg);color:var(--text)}
@@ -1281,9 +1283,9 @@ function pasosInstalar(){
       : sw ? `<b style="color:var(--warn)">se activa al recargar la página</b>`
       : `<b style="color:var(--warn)">no disponible</b> (la app funciona, pero necesita conexión)`}</div>`;
   if (ddg) return `<ol style="margin:6px 0 0;padding-left:20px;line-height:1.6">
-      <li><b>Protege la web del fuego 🔥</b> (lo más importante): menú <b>···</b> → <b>Proteger sitio contra el fuego</b> (<i>Fireproof</i>). Si no, el botón del fuego borra tus tareas.</li>
-      <li>Para tenerla como app: menú <b>···</b> → <b>Compartir</b> → desliza la lista hacia abajo → <b>Añadir a pantalla de inicio</b>.</li>
-      <li>Si esa opción no aparece: menú <b>···</b> → <b>Añadir a favoritos</b>, y la tienes a un toque al abrir DuckDuckGo.</li>
+      <li><b>Protege la web del fuego 🔥</b> (lo más importante): toca el menú <b>≡</b> (abajo a la derecha, tres rayas) → <b>Proteger sitio</b> / <i>Fireproof</i>. Si no, el botón del fuego borra tus tareas.</li>
+      <li>Para tenerla como app: toca <b>Compartir ↑</b> (arriba, junto a ↻) → desliza la hoja hacia arriba → <b>Añadir a pantalla de inicio</b>.</li>
+      <li>Si esa opción no aparece: menú <b>≡</b> → <b>Añadir a favoritos</b>, y la tienes a un toque al abrir DuckDuckGo.</li>
     </ol>${estado}`;
   return `<ol style="margin:6px 0 0;padding-left:20px;line-height:1.6">
     <li>Si la abriste desde otra app (Claude, WhatsApp, correo…), ábrela en tu navegador escribiendo <b>mgj-git.github.io/comodin</b>.</li>
