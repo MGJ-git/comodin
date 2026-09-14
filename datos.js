@@ -211,6 +211,12 @@ window.DATOS = {
       } },
   ],
 
+  // ---------- EVENTOS PUNTUALES (citas, reuniones) ----------
+  // Aparecen en Hoy y en Semana ese día y recortan el bloque con el que coincidan (las clases no).
+  eventos: [
+    { fecha: "2026-09-17", inicio: "17:30", fin: "18:30", titulo: "Café patentes" },
+  ],
+
   // ---------- FECHAS CLAVE (exámenes, hitos) ----------
   // Las tareas de prácticas se apuntan desde el panel; aquí van fechas fijas del curso.
   // tipo: entrega | examen | hito. asig: id de asignatura o "koppi".

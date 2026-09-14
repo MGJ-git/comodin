@@ -17,14 +17,14 @@
   --bg:#f5f4f0; --surface:#ffffff; --surface2:#efede8; --text:#1d1c1a; --muted:#6e6a63; --line:#e2dfd8;
   --accent:#2f5bd3; --danger:#d23b2e; --warn:#c77a0a; --ok:#1f9d55;
   --t-clase:#3b82f6; --t-estudio:#7c3aed; --t-actividad:#c026d3; --t-koppi:#ea580c;
-  --t-revision:#64748b; --t-deporte:#16a34a; --t-descanso:#a8a29e; --t-sueno:#4c5a86;
+  --t-revision:#64748b; --t-deporte:#16a34a; --t-descanso:#a8a29e; --t-sueno:#4c5a86; --t-evento:#65a30d;
   --radius:12px;
 }
 @media (prefers-color-scheme: dark){
   :root{
     --bg:#141413; --surface:#1e1d1b; --surface2:#292825; --text:#ecebe7; --muted:#a09c94; --line:#34322e;
     --accent:#7aa2ff; --danger:#ff6b5e; --warn:#f0a23b; --ok:#4ccf85;
-    --t-estudio:#a78bfa; --t-actividad:#e879f9; --t-koppi:#fb923c; --t-revision:#94a3b8; --t-deporte:#4ade80; --t-descanso:#78716c; --t-sueno:#8f9dcc;
+    --t-estudio:#a78bfa; --t-actividad:#e879f9; --t-koppi:#fb923c; --t-revision:#94a3b8; --t-deporte:#4ade80; --t-descanso:#78716c; --t-sueno:#8f9dcc; --t-evento:#a3e635;
   }
 }
 *{box-sizing:border-box}
@@ -123,6 +123,7 @@ ul.plain{list-style:none;margin:0;padding:0}
 .blk{position:absolute;left:3px;right:3px;border-radius:6px;padding:3px 6px;font-size:11.5px;line-height:1.25;overflow:hidden;
   background:color-mix(in srgb,var(--c) 17%,var(--surface));border-left:3px solid var(--c)}
 .blk b{display:block;font-weight:600}
+.blk.evento{background:color-mix(in srgb,var(--c) 32%,var(--surface));outline:1.5px solid var(--c);outline-offset:-1.5px}
 .blk.practica{outline:1.5px dashed var(--c);outline-offset:-1.5px}
 .ptag{font-size:9.5px;letter-spacing:.04em;font-weight:700;padding:0 4px;border-radius:4px;background:var(--c);color:#fff;vertical-align:1px}
 .blk.short{padding-block:1px}
@@ -256,6 +257,7 @@ const TIPOS = {
   deporte:   { n: "Gym",           c: "var(--t-deporte)" },
   descanso:  { n: "Descanso",      c: "var(--t-descanso)" },
   sueno:     { n: "Sueño",         c: "var(--t-sueno)" },
+  evento:    { n: "Eventos",       c: "var(--t-evento)" },
 };
 const MODOS = {
   normal:   { n: "Normal",    d: "Koppi por la noche y entre clases, tareas de prácticas por la tarde, gym 19:30." },
@@ -279,7 +281,24 @@ const colorDe = b => b.tipo === "clase" ? (A[b.asig]?.color || TIPOS.clase.c) : 
 const asigNombre = id => id === "koppi" ? "Koppi" : (A[id]?.nombre || id || "");
 const asigColor = id => id === "koppi" ? "var(--t-koppi)" : (A[id]?.color || "var(--muted)");
 
-function bloquesDia(dia, modo = S.modo){
+// Bloques de un día. Con `fecha` (AAAA-MM-DD) incluye los eventos puntuales de ese día:
+// recortan los bloques con los que se solapan (las clases no se tocan).
+function bloquesDia(dia, modo = S.modo, fecha = null){
+  const base = bloquesPlantilla(dia, modo);
+  const evs = fecha ? (D.eventos || []).filter(e => e.fecha === fecha).map(e => ({ ...e, tipo: "evento" })) : [];
+  if (!evs.length) return base;
+  let res = base;
+  for (const ev of evs){
+    const a = min(ev.inicio), b = min(ev.fin);
+    res = res.flatMap(bl => {
+      const x = min(bl.inicio), y = min(bl.fin);
+      if (bl.tipo === "clase" || y <= a || x >= b) return [bl];
+      return [...(x < a ? [{ ...bl, fin: ev.inicio }] : []), ...(y > b ? [{ ...bl, inicio: ev.fin }] : [])];
+    });
+  }
+  return [...res, ...evs].sort((p, q) => min(p.inicio) - min(q.inicio));
+}
+function bloquesPlantilla(dia, modo = S.modo){
   const clases = modo === "examenes" ? [] : (D.horario || []).filter(h => h.dias.includes(dia)).map(h => ({
     inicio: h.inicio, fin: h.fin, tipo: "clase", asig: h.asig,
     titulo: A[h.asig]?.sigla || A[h.asig]?.nombre || h.asig, practica: h.tipo === "practica",
@@ -407,7 +426,7 @@ function render(){
 
 function vHoy(){
   const h = hoy(), dia = diaSem(h), ahora = new Date(), nm = ahora.getHours()*60 + ahora.getMinutes();
-  const bl = bloquesDia(dia);
+  const bl = bloquesDia(dia, S.modo, ymd(h));
   const act = bl.find(b => min(b.inicio) <= nm && nm < min(b.fin));
   const sig = bl.find(b => min(b.inicio) > nm);
   const noche = suenoNoche(dia);
@@ -428,7 +447,9 @@ function vHoy(){
       <span class="dot" style="--c:${asigColor(id)};margin-top:5px"></span><span class="txt">${esc(asigNombre(id))} ${extra}</span></label>`;
   };
 
-  const prox = D.fechas.filter(f => parse(f.fecha) >= h).sort((a, b) => a.fecha.localeCompare(b.fecha)).slice(0, 6);
+  const eventosProx = (D.eventos || []).filter(e => parse(e.fecha) >= h && parse(e.fecha) <= addDias(h, 7)).map(e => ({ ...e, tipo: "evento", asig: "" }));
+  const prox = [...D.fechas.filter(f => parse(f.fecha) >= h), ...eventosProx]
+    .sort((a, b) => (a.fecha + (a.inicio || "")).localeCompare(b.fecha + (b.inicio || ""))).slice(0, 6);
   const conFecha = S.tareas.filter(t => !t.hecha && t.fecha).sort(ordenTareas);
   const sinFecha = S.tareas.filter(t => !t.hecha && !t.fecha).length;
   const blkNom = b => b ? `<span class="dot" style="--c:${colorDe(b)}"></span> ${esc(b.titulo)}` : "—";
@@ -504,7 +525,11 @@ function itemHabito(hb, h){
 function itemFecha(f){
   const h = hoy(), d = parse(f.fecha), n = entre(h, d);
   const interna = f.tipo === "entrega" ? addDias(d, -(D.margenEntregas || 0)) : null;
-  const tipoChip = { entrega: "Entrega", examen: "Examen", hito: "Hito" }[f.tipo] || f.tipo;
+  const tipoChip = { entrega: "Entrega", examen: "Examen", hito: "Hito", evento: "Evento" }[f.tipo] || f.tipo;
+  if (f.tipo === "evento") return `<div class="date-item">
+    <span class="dot" style="--c:var(--t-evento)"></span>
+    <div class="grow"><div><b>${esc(f.titulo)}</b></div><div class="small muted">Evento · ${fechaCorta(d)} · ${f.inicio}–${f.fin}${f.lugar ? ` · ${esc(f.lugar)}` : ""}</div></div>
+    ${chipDias(n)}</div>`;
   return `<div class="date-item" style="${n < 0 ? "opacity:.5" : ""}">
     <span class="dot" style="--c:${asigColor(f.asig)}"></span>
     <div class="grow"><div><b>${esc(f.titulo)}</b></div>
@@ -514,7 +539,7 @@ function itemFecha(f){
 
 function vSemana(){
   const h = hoy(), hd = diaSem(h), lun = lunesDe(h);
-  const todos = []; for (let d = 1; d <= 7; d++) todos.push(bloquesDia(d));
+  const todos = []; for (let d = 1; d <= 7; d++) todos.push(bloquesDia(d, S.modo, ymd(addDias(lun, d - 1))));
   const flat = todos.flat();
   const ini = Math.floor(Math.min(8*60, ...flat.map(b => min(b.inicio))) / 60);
   const fin = Math.ceil(Math.max(21*60, ...flat.map(b => min(b.fin))) / 60);
@@ -657,7 +682,7 @@ function kBloque(){
   const ahora = new Date(), nm = ahora.getHours()*60 + ahora.getMinutes();
   for (let i = 0; i < 8; i++){
     const d = addDias(hoy(), i);
-    for (const b of bloquesDia(diaSem(d)).filter(b => b.tipo === "koppi")){
+    for (const b of bloquesDia(diaSem(d), S.modo, ymd(d)).filter(b => b.tipo === "koppi")){
       if (i === 0 && min(b.fin) <= nm) continue;
       const enCurso = i === 0 && min(b.inicio) <= nm;
       return { b, d, enCurso, quedan: min(b.fin) - (enCurso ? nm : min(b.inicio)), dur: min(b.fin) - min(b.inicio) };
