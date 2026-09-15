@@ -693,14 +693,18 @@ function vFechas(){
 }
 
 // ---------- KOPPI: gameplan ----------
-const FASES = [
+const FASES = D.koppi?.fases || [
   { id: 1, n: "Terminar lo empezado", d: "Lo que está a medias, hasta dejarlo cerrado." },
   { id: 2, n: "Páginas nuevas", d: "Las páginas que faltan para la v1." },
   { id: 3, n: "Pulido y lanzamiento", d: "Bugs, textos, móvil, publicar." },
 ];
 const TAMS = { S: { n: "S · 30 min", max: 30 }, M: { n: "M · hasta 1,5 h", max: 90 }, L: { n: "L · 2–3 h", max: 180 } };
-const TIPOS_K = { pagina: "Página", terminar: "Terminar", bug: "Bug", pulido: "Pulido", otro: "Otro" };
-const DOD_PAGINA = ["Estructura y diseño", "Datos conectados", "Estados: vacío, cargando y error", "Se ve bien en móvil", "Probada de principio a fin"];
+const TIPOS_K = { pagina: "Pantalla", terminar: "Terminar", hardware: "Hardware", bug: "Bug", pulido: "Pulido", negocio: "Negocio", otro: "Otro" };
+const DOD_PAGINA = D.koppi?.checklistPantalla || ["Estructura y diseño", "Datos conectados", "Estados: vacío, cargando y error", "Se ve bien en móvil", "Probada de principio a fin"];
+const nombreFase = id => FASES.find(f => f.id === +id)?.n || `Fase ${id}`;
+// Fase actual = la primera con tareas sin terminar
+const faseActual = () => { const k = K(); return FASES.find(f => k.items.some(i => +i.fase === f.id && i.estado !== "hecho"))?.id ?? FASES[0]?.id; };
+const kFasesAbiertas = new Set();
 const ESTADOS_K = { pendiente: "Pendiente", curso: "A medias", hecho: "Hecha" };
 const K = () => {
   const k = (S.koppi ||= {});
@@ -743,7 +747,7 @@ function kLineaHoy(act, sig){
 }
 function chipsItem(it){
   return `<div class="row" style="gap:6px;margin:4px 0"><span class="chip">${TAMS[it.tam]?.n || it.tam}</span><span class="chip">${TIPOS_K[it.tipo] || it.tipo}</span>
-    <span class="chip">Fase ${it.fase}</span>${it.estado === "curso" ? `<span class="chip warn">A medias</span>` : ""}</div>`;
+    <span class="chip">${esc(nombreFase(it.fase))}</span>${it.cuando ? `<span class="chip">📅 ${esc(it.cuando)}</span>` : ""}${it.estado === "curso" ? `<span class="chip warn">A medias</span>` : ""}</div>`;
 }
 function checklistItem(it){
   if (!it.checklist?.length) return "";
@@ -833,7 +837,7 @@ function vKoppi(){
   <div class="card" style="margin-top:14px"><h2>Añadir tarea al gameplan</h2>
     <form data-form="k-item" class="capt">
       <input type="text" name="titulo" placeholder="p. ej. «Página de perfil» o «Terminar el checkout»" required autocomplete="off">
-      <select name="fase">${FASES.map(f => `<option value="${f.id}">Fase ${f.id} · ${f.n}</option>`).join("")}</select>
+      <select name="fase">${FASES.map(f => `<option value="${f.id}" ${f.id === faseActual() ? "selected" : ""}>Fase ${f.id} · ${esc(f.n)}</option>`).join("")}</select>
       <select name="tipo">${Object.entries(TIPOS_K).map(([v, n]) => `<option value="${v}">${n}</option>`).join("")}</select>
       <select name="tam">${Object.entries(TAMS).map(([v, t]) => `<option value="${v}" ${v === "M" ? "selected" : ""}>${t.n}</option>`).join("")}</select>
       <button class="btn primary">Añadir</button>
@@ -841,12 +845,22 @@ function vKoppi(){
     <p class="small muted" style="margin:8px 0 0"><b>S</b> cabe en un hueco entre clases · <b>M</b> en una noche · <b>L</b> solo en la noche larga del viernes. Si es más grande, pártela. Las páginas traen su checklist de «terminada».</p>
   </div>
 
-  <div class="grid g3" style="margin-top:14px">
-    ${FASES.map(f => { const its = k.items.filter(i => +i.fase === f.id), h = its.filter(i => i.estado === "hecho").length;
-      return `<div class="card"><div class="spread"><h2>Fase ${f.id} · ${f.n}</h2><span class="chip">${h}/${its.length}</span></div>
-        <div class="small muted" style="margin:-4px 0 8px">${f.d}</div>
-        ${its.length ? its.map(itemKoppi).join("") : `<div class="empty small">Sin tareas.</div>`}</div>`; }).join("")}
+  <div class="grid" style="margin-top:14px">
+    ${(() => { const actual = faseActual(); if (!kFasesAbiertas.size) kFasesAbiertas.add(String(actual));
+      return FASES.map(f => { const its = k.items.filter(i => +i.fase === f.id), h = its.filter(i => i.estado === "hecho").length;
+        const pct = its.length ? Math.round(h / its.length * 100) : 0;
+        return `<details class="card kfase" data-fase="${f.id}" ${kFasesAbiertas.has(String(f.id)) ? "open" : ""}>
+          <summary class="spread"><h2 style="margin:0">Fase ${f.id} · ${esc(f.n)} ${f.id === actual ? `<span class="chip warn" style="text-transform:none;letter-spacing:0">ahora</span>` : ""}</h2><span class="chip ${its.length && h === its.length ? "ok" : ""}">${h}/${its.length}</span></summary>
+          <div class="small muted" style="margin:6px 0 6px">${esc(f.d)}</div>
+          <div class="pbar" style="--c:var(--t-koppi);margin-bottom:8px"><i style="width:${pct}%"></i></div>
+          ${its.length ? its.map(itemKoppi).join("") : `<div class="empty small">Sin tareas.</div>`}</details>`; }).join(""); })()}
   </div>
+
+  <details class="card" style="margin-top:14px">
+    <summary><b>Importar tareas</b> <span class="muted small">· pega el gameplan que te pasa Claude (no borra nada)</span></summary>
+    <textarea data-kimport style="margin-top:10px;min-height:110px" placeholder='{"items": [...]}'></textarea>
+    <div class="row" style="margin-top:8px"><button class="btn primary" data-act="k-importar">Importar</button><span class="small muted" data-kimport-res></span></div>
+  </details>
 
   <div class="grid g2" style="margin-top:14px">
     <div class="card"><h2>Últimas sesiones</h2>
@@ -859,8 +873,10 @@ function vKoppi(){
       <ul class="small" style="padding-left:18px;margin:0;line-height:1.75">
         <li>Nunca cierres una sesión sin escribir el <b>siguiente paso</b>.</li>
         <li>Antes de empezar, una frase: «al acabar este bloque tendré…».</li>
-        <li>Fase 1 antes que fase 2: termina lo empezado antes de abrir páginas nuevas.</li>
-        <li>Una página está hecha cuando pasa su checklist, no cuando «se ve».</li>
+        <li>Una fase cada vez y como máximo <b>una tarea a medias</b>.</li>
+        <li><b>Arreglar, no reescribir</b>: nada de <code>dash_new2.py</code>; si es arriesgado, una rama de git.</li>
+        <li>Una pantalla está hecha cuando pasa su checklist, no cuando «se ve».</li>
+        <li>Sesión en el coche fija: <b>viernes por la noche</b>.</li>
         <li>¿Atascado más de 20 min? Apunta la duda en el siguiente paso, cambia a una tarea S y vuelve otro día.</li>
         <li>Ideas nuevas → <a href="02-Koppi/Ideas-aparcadas.md">Ideas aparcadas</a>, no al gameplan. Se deciden el domingo.</li>
       </ul>
@@ -1178,6 +1194,11 @@ document.addEventListener("click", e => {
   else if (act === "sync-salir"){ if (confirm("¿Cerrar sesión en este dispositivo?")) window.syncInfo?.cerrarSesion?.(); }
   else if (act === "sync-entrar"){ window.syncInfo?.iniciarSesion?.(); }
   else if (act === "k-otra"){ kSalto++; render(); }
+  else if (act === "k-importar"){
+    const ta = document.querySelector("[data-kimport]"), res = document.querySelector("[data-kimport-res]");
+    try { const msg = importarKoppi(ta.value.trim()); toast("✅ " + msg); }
+    catch (err){ if (res){ res.textContent = "No es un gameplan válido: copia el texto completo, desde { hasta }."; res.style.color = "var(--danger)"; } }
+  }
   else if (act === "k-cancelar"){
     const k = K(), it = k.items.find(i => i.id === k.activa);
     if (it){ it.estado = it.estadoPrevio || it.estado; it.plan = ""; } k.activa = null; save(); render();
@@ -1233,9 +1254,34 @@ document.addEventListener("input", e => {
   else if (act === "k-meta"){ K()[el.dataset.f] = el.value; save(); }
 });
 document.addEventListener("toggle", e => {
-  const d = e.target; if (!d.classList?.contains("kitem")) return;
-  d.open ? kAbiertos.add(d.dataset.id) : kAbiertos.delete(d.dataset.id);
+  const d = e.target;
+  if (d.classList?.contains("kitem")) d.open ? kAbiertos.add(d.dataset.id) : kAbiertos.delete(d.dataset.id);
+  if (d.classList?.contains("kfase")){ if (d.open) kFasesAbiertas.add(d.dataset.fase); else { kFasesAbiertas.delete(d.dataset.fase); if (!kFasesAbiertas.size) kFasesAbiertas.add("-"); } }
 }, true);
+// Importar gameplan: { objetivo?, fecha?, criterios?: [texto], items: [{ id, titulo, fase, tipo, tam, cuando?, siguiente? }] }
+function importarKoppi(txt){
+  const datos = JSON.parse(txt);
+  const k = K(); let nuevos = 0, crit = 0;
+  if (datos.objetivo && !k.objetivo) k.objetivo = String(datos.objetivo);
+  if (datos.fecha && !k.fecha) k.fecha = String(datos.fecha);
+  for (const c of datos.criterios || []){
+    const t = typeof c === "string" ? c : c.t;
+    if (t && !k.criterios.some(x => x.t === t)){ k.criterios.push({ t, ok: false }); crit++; }
+  }
+  for (const it of datos.items || []){
+    if (!it.titulo) continue;
+    const id = String(it.id || kid());
+    if (k.items.some(x => x.id === id)) continue;
+    const tipo = TIPOS_K[it.tipo] ? it.tipo : "otro";
+    k.items.push({ id, titulo: String(it.titulo), fase: +it.fase || 0, tipo, tam: TAMS[it.tam] ? it.tam : "M",
+      estado: "pendiente", siguiente: it.siguiente || "", cuando: it.cuando || "",
+      checklist: tipo === "pagina" ? DOD_PAGINA.map(t => ({ t, ok: false })) : [] });
+    nuevos++;
+  }
+  kFasesAbiertas.clear();
+  save(); render();
+  return `${nuevos} tareas y ${crit} criterios añadidos.`;
+}
 document.addEventListener("submit", e => {
   const f = e.target; e.preventDefault();
   if (f.dataset.form?.startsWith("k-")) return submitKoppi(f);

@@ -211,6 +211,20 @@ window.DATOS = {
       } },
   ],
 
+  // ---------- KOPPI: fases del gameplan ----------
+  // Las tareas NO van aquí (el repo es público): se importan desde la pestaña Koppi.
+  koppi: {
+    fases: [
+      { id: 0, n: "Orden y base",              d: "15–20 sep · dejar de trabajar a ciegas y con duplicados" },
+      { id: 1, n: "Funciona solo en el coche", d: "21 sep–11 oct · arranque, apagado seguro y navegación táctil" },
+      { id: 2, n: "Pantallas terminadas",      d: "12 oct–1 nov · cada pantalla cumple el checklist" },
+      { id: 3, n: "Pruebas con 3–5 coches",    d: "2–15 nov · imagen SD, guía y compatibilidad" },
+      { id: 4, n: "Kit y marca",               d: "16 nov–6 dic · arte propio, carcasa, landing" },
+      { id: 5, n: "Lanzamiento beta",          d: "7–20 dic · montar kits y entregarlos" },
+    ],
+    checklistPantalla: ["Funciona con OBD real", "Solo con el dedo (sin teclado)", "30 FPS en la Pi", "Explica cuándo falta un dato", "Probada en el coche"],
+  },
+
   // ---------- EVENTOS PUNTUALES (citas, reuniones) ----------
   // Los eventos se crean desde la app (botón «+ Evento» o pulsando en el calendario).
   // Los de aquí se copian UNA vez a tus eventos (por id) y luego se editan/borran desde la app.
