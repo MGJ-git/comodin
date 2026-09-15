@@ -1264,23 +1264,52 @@ function importarKoppi(txt){
   const k = K(); let nuevos = 0, crit = 0;
   if (datos.objetivo && !k.objetivo) k.objetivo = String(datos.objetivo);
   if (datos.fecha && !k.fecha) k.fecha = String(datos.fecha);
-  for (const c of datos.criterios || []){
+  if (datos.reemplazar && datos.objetivo) k.objetivo = String(datos.objetivo);
+  if (datos.reemplazar && Array.isArray(datos.criterios)){
+    // la lista del plan sustituye a la anterior, conservando los ya marcados
+    const marcados = new Set(k.criterios.filter(x => x.ok).map(x => x.t));
+    k.criterios = datos.criterios.map(c => typeof c === "string" ? c : c.t).filter(Boolean).map(t => ({ t, ok: marcados.has(t) }));
+    crit = k.criterios.length;
+  } else for (const c of datos.criterios || []){
     const t = typeof c === "string" ? c : c.t;
     if (t && !k.criterios.some(x => x.t === t)){ k.criterios.push({ t, ok: false }); crit++; }
   }
+  // Con "reemplazar": "prefijo", una versión nueva del plan sustituye a la anterior:
+  // actualiza las tareas pendientes con ese prefijo y quita las que ya no están; lo empezado o hecho no se toca.
+  const pref = datos.reemplazar ? String(datos.reemplazar) : null;
+  const idsNuevos = new Set((datos.items || []).map(it => String(it.id)));
+  let actualizadas = 0, quitadas = 0;
+  if (pref){
+    const antes = k.items.length;
+    k.items = k.items.filter(x => !(x.id.startsWith(pref) && x.estado === "pendiente" && !idsNuevos.has(x.id) && x.id !== k.activa));
+    quitadas = antes - k.items.length;
+  }
+  const orden = [];
   for (const it of datos.items || []){
     if (!it.titulo) continue;
     const id = String(it.id || kid());
-    if (k.items.some(x => x.id === id)) continue;
     const tipo = TIPOS_K[it.tipo] ? it.tipo : "otro";
-    k.items.push({ id, titulo: String(it.titulo), fase: +it.fase || 0, tipo, tam: TAMS[it.tam] ? it.tam : "M",
-      estado: "pendiente", siguiente: it.siguiente || "", cuando: it.cuando || "",
+    const campos = { titulo: String(it.titulo), fase: +it.fase || 0, tipo, tam: TAMS[it.tam] ? it.tam : "M", cuando: it.cuando || "" };
+    const existente = k.items.find(x => x.id === id);
+    if (existente){
+      if (pref && id.startsWith(pref) && existente.estado !== "hecho"){
+        Object.assign(existente, campos);
+        if (it.estado === "hecho") existente.estado = "hecho";
+        actualizadas++;
+      }
+      orden.push(id);
+      continue;
+    }
+    k.items.push({ id, ...campos, estado: it.estado === "hecho" ? "hecho" : "pendiente", siguiente: it.siguiente || "",
       checklist: tipo === "pagina" ? DOD_PAGINA.map(t => ({ t, ok: false })) : [] });
+    orden.push(id);
     nuevos++;
   }
+  // mismo orden que el plan; las tareas propias (fuera del plan) se quedan al final
+  if (pref){ const pos = new Map(orden.map((id, i) => [id, i])); k.items.sort((a, b) => (pos.get(a.id) ?? 1e6) - (pos.get(b.id) ?? 1e6)); }
   kFasesAbiertas.clear();
   save(); render();
-  return `${nuevos} tareas y ${crit} criterios añadidos.`;
+  return `${nuevos} nuevas, ${actualizadas} actualizadas, ${quitadas} quitadas y ${crit} criterios añadidos.`;
 }
 document.addEventListener("submit", e => {
   const f = e.target; e.preventDefault();
