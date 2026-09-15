@@ -215,12 +215,13 @@ window.DATOS = {
   // Las tareas NO van aquí (el repo es público): se importan desde la pestaña Koppi.
   koppi: {
     fases: [
-      { id: 0, n: "Medir y preparar",               d: "15–20 sep · contador de FPS/RAM y probar en la Pi sin sacar la tarjeta" },
-      { id: 1, n: "Base común",                     d: "21 sep–4 oct · config, OBD en segundo plano, gestor de pantallas y recursos, autoarranque" },
-      { id: 2, n: "Pantallas dentro y a 30 FPS",    d: "5 oct–1 nov · cada pantalla en la app común y optimizada" },
-      { id: 3, n: "Lógica de producto",             d: "2–22 nov · perfiles, logros, mensajes, recompensas, ajustes" },
-      { id: 4, n: "Sistema y microSD maestra",      d: "23 nov–6 dic · apagado, solo lectura, clonado" },
-      { id: 5, n: "Pruebas y cierre",               d: "7–20 dic · 3 coches y microSD maestra definitiva" },
+      { id: 0, n: "Medir y preparar",          d: "15–20 sep · contador de FPS/RAM y probar en la Pi sin sacar la tarjeta" },
+      { id: 1, n: "Dashboard perfecto",        d: "21 sep–11 oct · OBD en segundo plano, 30 FPS, recursos cacheados; de aquí sale el esqueleto" },
+      { id: 2, n: "Sacar el esqueleto",        d: "12–18 oct · core/, plantilla de pantalla, navegación, autoarranque" },
+      { id: 3, n: "DTCs",                      d: "19–25 oct · leer, explicar en español, borrar y avisar" },
+      { id: 4, n: "Logros y progresión",       d: "26 oct–15 nov · eventos, motor de logros, rangos, recompensas, mensajes" },
+      { id: 5, n: "Sistema y microSD maestra", d: "16–29 nov · apagado limpio, solo lectura, clonado · código terminado" },
+      { id: 6, n: "Pruebas y extras",          d: "30 nov–20 dic · 3 coches y microSD maestra definitiva" },
     ],
     checklistPantalla: ["Funciona con OBD real", "Solo con el dedo (sin teclado)", "30 FPS en la Pi", "Explica cuándo falta un dato", "Probada en el coche"],
   },
