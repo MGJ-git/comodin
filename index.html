@@ -1279,11 +1279,15 @@ function importarKoppi(txt){
   const pref = datos.reemplazar ? String(datos.reemplazar) : null;
   const idsNuevos = new Set((datos.items || []).map(it => String(it.id)));
   let actualizadas = 0, quitadas = 0;
+  const antes = k.items.length;
   if (pref){
-    const antes = k.items.length;
     k.items = k.items.filter(x => !(x.id.startsWith(pref) && x.estado === "pendiente" && !idsNuevos.has(x.id) && x.id !== k.activa));
-    quitadas = antes - k.items.length;
   }
+  // "quitar": prefijos de planes antiguos que se eliminan del todo (menos la tarea en marcha)
+  for (const q of datos.quitar || []){
+    k.items = k.items.filter(x => !(x.id.startsWith(String(q)) && x.id !== k.activa));
+  }
+  quitadas = antes - k.items.length;
   const orden = [];
   for (const it of datos.items || []){
     if (!it.titulo) continue;
