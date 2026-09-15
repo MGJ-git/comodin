@@ -699,7 +699,7 @@ const FASES = D.koppi?.fases || [
   { id: 3, n: "Pulido y lanzamiento", d: "Bugs, textos, móvil, publicar." },
 ];
 const TAMS = { S: { n: "S · 30 min", max: 30 }, M: { n: "M · hasta 1,5 h", max: 90 }, L: { n: "L · 2–3 h", max: 180 } };
-const TIPOS_K = { programar: "💻 Programar", dibujar: "🎨 Dibujar", probar: "🚗 Probar", pagina: "Pantalla", terminar: "Terminar", hardware: "Hardware", bug: "Bug", pulido: "Pulido", negocio: "Negocio", otro: "Otro" };
+const TIPOS_K = { programar: "💻 Programar", dibujar: "🎨 Dibujar", disenar: "✏️ Diseñar", probar: "🚗 Probar", pagina: "Pantalla", terminar: "Terminar", hardware: "Hardware", bug: "Bug", pulido: "Pulido", negocio: "Negocio", otro: "Otro" };
 const DOD_PAGINA = D.koppi?.checklistPantalla || ["Estructura y diseño", "Datos conectados", "Estados: vacío, cargando y error", "Se ve bien en móvil", "Probada de principio a fin"];
 const nombreFase = id => FASES.find(f => f.id === +id)?.n || `Fase ${id}`;
 // Fase actual = la primera con tareas sin terminar
@@ -764,7 +764,7 @@ function checklistItem(it){
 function itemKoppi(it){
   const n = it.checklist?.length || 0, ok = (it.checklist || []).filter(c => c.ok).length;
   return `<details class="kitem ${it.estado}" data-id="${it.id}" ${kAbiertos.has(it.id) ? "open" : ""}><summary>
-      <span class="kst" title="${ESTADOS_K[it.estado]}"></span><span class="grow">${it.cuando ? `<span class="muted small" style="white-space:nowrap">${esc(it.cuando)} · </span>` : ""}${{ programar: "💻 ", dibujar: "🎨 ", probar: "🚗 " }[it.tipo] || ""}${esc(it.titulo)}</span>
+      <span class="kst" title="${ESTADOS_K[it.estado]}"></span><span class="grow">${it.cuando ? `<span class="muted small" style="white-space:nowrap">${esc(it.cuando)} · </span>` : ""}${{ programar: "💻 ", dibujar: "🎨 ", disenar: "✏️ ", probar: "🚗 " }[it.tipo] || ""}${esc(it.titulo)}</span>
       <span class="chip">${it.tam}</span>${n ? `<span class="chip">${ok}/${n}</span>` : ""}</summary>
     <div style="padding:6px 0 4px 22px">
       <div class="row small" style="margin-bottom:6px">
