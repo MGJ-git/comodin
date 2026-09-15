@@ -1415,8 +1415,24 @@ try {
 } catch(e){}
 window.addEventListener("syncinfo", () => { if (vista === "revision") programarRender(); });
 
+// Plan de KOPPI: se carga solo desde koppi-plan.json y se vuelve a aplicar cuando cambia su versión
+// (lo empezado o hecho se conserva; ver importarKoppi)
+async function cargarPlanKoppi(){
+  try {
+    const r = await fetch("koppi-plan.json?t=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) return;
+    const txt = await r.text(), datos = JSON.parse(txt);
+    if (!datos.version || K().planVersion === datos.version) return;
+    const primera = !K().planVersion;
+    importarKoppi(txt);
+    K().planVersion = datos.version; save(); render();
+    toast(primera ? "📋 Plan de KOPPI cargado." : "📋 Plan de KOPPI actualizado.");
+  } catch(e){ /* sin conexión y sin copia guardada: se intentará la próxima vez */ }
+}
+
 sembrarEventos();
 render();
+cargarPlanKoppi();
 </script>
 <script type="module" src="sync.js"></script>
 </body>
