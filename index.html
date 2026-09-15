@@ -699,7 +699,7 @@ const FASES = D.koppi?.fases || [
   { id: 3, n: "Pulido y lanzamiento", d: "Bugs, textos, móvil, publicar." },
 ];
 const TAMS = { S: { n: "S · 30 min", max: 30 }, M: { n: "M · hasta 1,5 h", max: 90 }, L: { n: "L · 2–3 h", max: 180 } };
-const TIPOS_K = { pagina: "Pantalla", terminar: "Terminar", hardware: "Hardware", bug: "Bug", pulido: "Pulido", negocio: "Negocio", otro: "Otro" };
+const TIPOS_K = { programar: "💻 Programar", dibujar: "🎨 Dibujar", probar: "🚗 Probar", pagina: "Pantalla", terminar: "Terminar", hardware: "Hardware", bug: "Bug", pulido: "Pulido", negocio: "Negocio", otro: "Otro" };
 const DOD_PAGINA = D.koppi?.checklistPantalla || ["Estructura y diseño", "Datos conectados", "Estados: vacío, cargando y error", "Se ve bien en móvil", "Probada de principio a fin"];
 const nombreFase = id => FASES.find(f => f.id === +id)?.n || `Fase ${id}`;
 // Fase actual = la primera con tareas sin terminar
@@ -737,11 +737,19 @@ function kSugerencias(minutos){
   const caben = orden.filter(it => it.tam === "L" ? minutos >= 120 : TAMS[it.tam].max <= minutos);
   return caben.length ? { lista: caben, caben: true } : { lista: orden, caben: false };
 }
+// Etiqueta de un bloque en el formato del plan día a día: «Mié 16 · 21:30»
+const etiquetaBloque = (d, b) => `${DIAS_C[diaSem(d)]} ${d.getDate()} · ${b.inicio}`;
+// Si hay una tarea programada justo para ese bloque, va la primera
+function conProgramada(lista, etiqueta){
+  const i = lista.findIndex(it => it.cuando === etiqueta);
+  return i > 0 ? [lista[i], ...lista.slice(0, i), ...lista.slice(i + 1)] : lista;
+}
 function kLineaHoy(act, sig){
   const b = act?.tipo === "koppi" ? act : sig?.tipo === "koppi" ? sig : null;
   if (!b) return "";
   const k = K(), activa = k.items.find(i => i.id === k.activa);
-  const it = activa || kSugerencias(min(b.fin) - min(b.inicio)).lista[0];
+  const programada = K().items.find(i => i.estado !== "hecho" && i.cuando === etiquetaBloque(hoy(), b));
+  const it = activa || programada || kSugerencias(min(b.fin) - min(b.inicio)).lista[0];
   return `<a href="#koppi" data-act="vista" data-v="koppi" class="klinea small">
     <b>Koppi ${b === act ? "ahora" : "a las " + b.inicio}:</b> ${it ? esc(it.titulo) + (it.siguiente ? ` <span class="muted">→ ${esc(it.siguiente)}</span>` : "") : "aún no hay gameplan, ábrelo aquí →"}</a>`;
 }
@@ -756,7 +764,7 @@ function checklistItem(it){
 function itemKoppi(it){
   const n = it.checklist?.length || 0, ok = (it.checklist || []).filter(c => c.ok).length;
   return `<details class="kitem ${it.estado}" data-id="${it.id}" ${kAbiertos.has(it.id) ? "open" : ""}><summary>
-      <span class="kst" title="${ESTADOS_K[it.estado]}"></span><span class="grow">${esc(it.titulo)}</span>
+      <span class="kst" title="${ESTADOS_K[it.estado]}"></span><span class="grow">${it.cuando ? `<span class="muted small" style="white-space:nowrap">${esc(it.cuando)} · </span>` : ""}${{ programar: "💻 ", dibujar: "🎨 ", probar: "🚗 " }[it.tipo] || ""}${esc(it.titulo)}</span>
       <span class="chip">${it.tam}</span>${n ? `<span class="chip">${ok}/${n}</span>` : ""}</summary>
     <div style="padding:6px 0 4px 22px">
       <div class="row small" style="margin-bottom:6px">
@@ -774,7 +782,13 @@ function itemKoppi(it){
 function vKoppi(){
   const k = K(), bq = kBloque();
   const activa = k.items.find(i => i.id === k.activa);
-  const { lista, caben } = kSugerencias(bq?.dur);
+  const sug0 = kSugerencias(bq?.dur);
+  let { caben } = sug0, lista = sug0.lista;
+  if (bq){
+    const etiqueta = etiquetaBloque(bq.d, bq.b);
+    const programada = K().items.find(i => i.estado !== "hecho" && i.cuando === etiqueta);
+    if (programada){ lista = conProgramada([programada, ...lista.filter(i => i !== programada)], etiqueta); caben = true; }
+  }
   const sug = lista.length ? lista[kSalto % lista.length] : null;
   const total = k.items.length, hechas = k.items.filter(i => i.estado === "hecho").length;
   const pct = total ? Math.round(hechas / total * 100) : 0;
