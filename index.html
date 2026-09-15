@@ -1265,6 +1265,7 @@ function importarKoppi(txt){
   if (datos.objetivo && !k.objetivo) k.objetivo = String(datos.objetivo);
   if (datos.fecha && !k.fecha) k.fecha = String(datos.fecha);
   if (datos.reemplazar && datos.objetivo) k.objetivo = String(datos.objetivo);
+  if (datos.reemplazar && datos.fecha) k.fecha = String(datos.fecha);
   if (datos.reemplazar && Array.isArray(datos.criterios)){
     // la lista del plan sustituye a la anterior, conservando los ya marcados
     const marcados = new Set(k.criterios.filter(x => x.ok).map(x => x.t));
